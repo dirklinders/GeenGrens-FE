@@ -1,16 +1,33 @@
+import { PageLayout, BlogArticle } from "@/components/grensverkenner"
+
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans">
-      <main className="flex w-full max-w-3xl flex-col items-center gap-8 px-6 py-16 text-center sm:items-start sm:text-left">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-4xl font-bold tracking-tight">
-            geengrens-FE
-          </h1>
-          <p className="max-w-md text-lg text-muted-foreground">
-            To get started, send a prompt or modify this page directly.
-          </p>
+    <PageLayout tagline="Observaties van Viktor Vermeer">
+      {/* Bio Section */}
+      <section className="mb-10 flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-medium text-muted-foreground">
+          FOTO
         </div>
-      </main>
-    </div>
-  );
+        <div>
+          <h2 className="font-serif text-xl font-bold text-foreground">Viktor Vermeer</h2>
+          <p className="text-sm text-muted-foreground">Onderzoeksjournalist Geografie</p>
+        </div>
+      </section>
+
+      {/* Blog Post */}
+      <BlogArticle date="17 MAART 2026" title="De schoonheid van een versnipperd dorp">
+        <p>
+          Mijn naam is Viktor Vermeer en ik ben verliefd op een grens. Wat voor velen een 
+          administratieve hoofdpijn lijkt, zie ik als een prachtig historisch monument. 
+          Baarle-Nassau en Baarle-Hertog vormen samen de meest complexe grensstructuur ter wereld.
+        </p>
+        <p>
+          Hier vind je geen muren, maar witte kruizen die dwars door huizen en tuinen lopen. 
+          Het is een plek waar de logica soms ver te zoeken is, maar waar de menselijke 
+          geschiedenis tastbaar wordt in elke stoeptegel. Op deze site leg ik vast wat dit 
+          dorp zo uniek maakt.
+        </p>
+      </BlogArticle>
+    </PageLayout>
+  )
 }

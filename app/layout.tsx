@@ -1,14 +1,22 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Libre_Baskerville, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const libreBaskerville = Libre_Baskerville({ 
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-serif"
+});
+
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-sans"
+});
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Grensverkenner - Observaties van Viktor Vermeer',
+  description: 'Ontdek de fascinerende wereld van Baarle-Nassau en Baarle-Hertog, de meest complexe grensstructuur ter wereld.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="nl">
+      <body className={`${inter.variable} ${libreBaskerville.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
