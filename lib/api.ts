@@ -79,7 +79,7 @@ export const authApi = {
     fetchApi<void>('/api/Auth/Logout', { method: 'POST' }),
 
   getGoogleLoginUrl: (returnUrl: string) =>
-    `${API_BASE_URL}/api/Auth/GoogleLogin?returnUrl=${encodeURIComponent(returnUrl)}`,
+    `${API_BASE_URL}/api/ExternalAuth/LoginGoogle?returnUrl=${encodeURIComponent(returnUrl)}`,
 };
 
 // Character endpoints

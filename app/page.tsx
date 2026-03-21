@@ -15,7 +15,7 @@ export default function Home() {
       </section>
 
       {/* Blog Post */}
-      <BlogArticle date="17 MAART 2026" title="De schoonheid van een versnipperd dorp">
+      <BlogArticle date="10 MAART 2026" title="De schoonheid van een versnipperd dorp">
         <p>
           Mijn naam is Viktor Vermeer en ik ben verliefd op een grens. Wat voor velen een 
           administratieve hoofdpijn lijkt, zie ik als een prachtig historisch monument. 

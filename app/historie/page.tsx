@@ -3,7 +3,7 @@ import { PageLayout, BlogArticle, ImageBox } from "@/components/grensverkenner"
 export default function HistoriePage() {
   return (
     <PageLayout tagline="De diepte in">
-      <BlogArticle date="15 MAART 2026" title="Waarom we hier met twee maten meten">
+      <BlogArticle date="31 MAART 2026" title="Waarom we hier met twee maten meten">
         <p>
           Men vraagt mij vaak: &ldquo;Viktor, waarom die obsessie met een paar lijnen op de grond?&rdquo; 
           Mijn antwoord is altijd hetzelfde: omdat die lijnen het verhaal vertellen van achthonderd 
