@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Set NEXT_PUBLIC_ENABLE_DOMAIN_ROUTING=true to enable domain-based routing
+// Set ENABLE_DOMAIN_ROUTING=true to enable domain-based routing
 // When enabled:
 // - game.yourdomain.com routes to /game/*
 // - yourdomain.com blocks /game/* routes (returns 404)
-const ENABLE_DOMAIN_ROUTING = process.env.NEXT_PUBLIC_ENABLE_DOMAIN_ROUTING === 'true';
+// Note: This is a server-side env var (no NEXT_PUBLIC_ prefix) because middleware runs on the edge
+const ENABLE_DOMAIN_ROUTING = process.env.ENABLE_DOMAIN_ROUTING === 'true';
 
 export function middleware(request: NextRequest) {
   // Skip if domain routing is disabled

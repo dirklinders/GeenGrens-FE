@@ -13,6 +13,64 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
+// Moved outside to prevent recreation on each render
+function SidebarContent({
+  characters,
+  charactersLoading,
+  selectedCharacterId,
+  onSelectCharacter,
+  user,
+  onLogout,
+}: {
+  characters: CharacterDTO[];
+  charactersLoading: boolean;
+  selectedCharacterId: number | null;
+  onSelectCharacter: (id: number) => void;
+  user: { name?: string; email?: string } | null;
+  onLogout: () => void;
+}) {
+  return (
+    <div className="h-full flex flex-col bg-stone-900">
+      <div className="p-4 border-b border-stone-800">
+        <Link href="/game" className="font-serif text-xl text-stone-100">
+          GeenGrens
+        </Link>
+        <p className="text-xs text-stone-500 mt-1">Onderzoek de moord op Viktor Vermeer</p>
+      </div>
+      
+      <ScrollArea className="flex-1 p-4">
+        {charactersLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="animate-pulse bg-stone-800 h-16 rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <CharacterSelector
+            characters={characters}
+            selectedId={selectedCharacterId}
+            onSelect={onSelectCharacter}
+          />
+        )}
+      </ScrollArea>
+
+      <div className="p-4 border-t border-stone-800 space-y-2">
+        <div className="text-xs text-stone-500 truncate">
+          {user?.name || user?.email}
+        </div>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onLogout}
+          className="w-full text-stone-400 hover:text-stone-100 hover:bg-stone-800 justify-start"
+        >
+          Uitloggen
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function ChatContent() {
   const { user, logout } = useAuth();
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
@@ -39,7 +97,9 @@ function ChatContent() {
 
   // Update local messages when chat history changes
   useEffect(() => {
-    setLocalMessages(chatHistory);
+    if (chatHistory.length > 0) {
+      setLocalMessages(chatHistory);
+    }
   }, [chatHistory]);
 
   // Scroll to bottom when messages change
@@ -102,53 +162,18 @@ function ChatContent() {
     }
   };
 
-  // Sidebar content
-  const SidebarContent = () => (
-    <div className="h-full flex flex-col bg-stone-900">
-      <div className="p-4 border-b border-stone-800">
-        <Link href="/game" className="font-serif text-xl text-stone-100">
-          GeenGrens
-        </Link>
-        <p className="text-xs text-stone-500 mt-1">Onderzoek de moord op Viktor Vermeer</p>
-      </div>
-      
-      <ScrollArea className="flex-1 p-4">
-        {charactersLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse bg-stone-800 h-16 rounded-lg" />
-            ))}
-          </div>
-        ) : (
-          <CharacterSelector
-            characters={characters}
-            selectedId={selectedCharacterId}
-            onSelect={handleSelectCharacter}
-          />
-        )}
-      </ScrollArea>
-
-      <div className="p-4 border-t border-stone-800 space-y-2">
-        <div className="text-xs text-stone-500 truncate">
-          {user?.name || user?.email}
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={logout}
-          className="w-full text-stone-400 hover:text-stone-100 hover:bg-stone-800 justify-start"
-        >
-          Uitloggen
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="h-screen bg-stone-950 flex">
       {/* Desktop Sidebar */}
       <aside className="hidden md:block w-72 border-r border-stone-800 flex-shrink-0">
-        <SidebarContent />
+        <SidebarContent
+          characters={characters}
+          charactersLoading={charactersLoading}
+          selectedCharacterId={selectedCharacterId}
+          onSelectCharacter={handleSelectCharacter}
+          user={user}
+          onLogout={logout}
+        />
       </aside>
 
       {/* Main Chat Area */}
@@ -165,7 +190,14 @@ function ChatContent() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 bg-stone-900 border-stone-800">
-              <SidebarContent />
+              <SidebarContent
+                characters={characters}
+                charactersLoading={charactersLoading}
+                selectedCharacterId={selectedCharacterId}
+                onSelectCharacter={handleSelectCharacter}
+                user={user}
+                onLogout={logout}
+              />
             </SheetContent>
           </Sheet>
 
