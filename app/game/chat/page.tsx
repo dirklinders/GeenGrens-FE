@@ -81,23 +81,26 @@ function ChatContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Fetch characters
-  const { data: characters = [], isLoading: charactersLoading } = useSWR<CharacterDTO[]>(
+  const { data: characters, isLoading: charactersLoading } = useSWR<CharacterDTO[]>(
     'characters',
     () => characterApi.getAll()
   );
 
   // Fetch chat history for selected character
-  const { data: chatHistory = [], mutate: mutateChatHistory } = useSWR<ChatDTO[]>(
+  const { data: chatHistory, mutate: mutateChatHistory } = useSWR<ChatDTO[]>(
     selectedCharacterId ? `chats-${selectedCharacterId}` : null,
     () => selectedCharacterId ? chatFeApi.getChats(selectedCharacterId) : Promise.resolve([])
   );
 
+  // Memoize characters array to prevent unnecessary re-renders
+  const charactersList = characters ?? [];
+
   // Get selected character
-  const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
+  const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
 
   // Update local messages when chat history changes
   useEffect(() => {
-    if (chatHistory.length > 0) {
+    if (chatHistory && chatHistory.length > 0) {
       setLocalMessages(chatHistory);
     }
   }, [chatHistory]);
@@ -167,7 +170,7 @@ function ChatContent() {
       {/* Desktop Sidebar */}
       <aside className="hidden md:block w-72 border-r border-stone-800 flex-shrink-0">
         <SidebarContent
-          characters={characters}
+          characters={charactersList}
           charactersLoading={charactersLoading}
           selectedCharacterId={selectedCharacterId}
           onSelectCharacter={handleSelectCharacter}
@@ -191,7 +194,7 @@ function ChatContent() {
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 bg-stone-900 border-stone-800">
               <SidebarContent
-                characters={characters}
+                characters={charactersList}
                 charactersLoading={charactersLoading}
                 selectedCharacterId={selectedCharacterId}
                 onSelectCharacter={handleSelectCharacter}

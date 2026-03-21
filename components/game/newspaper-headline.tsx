@@ -101,35 +101,42 @@ export function NewspaperHeadline() {
           </div>
         </div>
 
-        {/* Article columns */}
+        {/* Article columns - Hidden hint: first letters of each paragraph spell "KERK ONDER KLOK" */}
         <div className="grid md:grid-cols-2 gap-6 text-sm leading-relaxed text-stone-800 border-t border-stone-300 pt-6">
           <div className="space-y-4">
             <p className="first-letter:text-4xl first-letter:font-serif first-letter:font-bold first-letter:float-left first-letter:mr-2 first-letter:mt-1">
-              De bekende journalist en grensonderzoeker Viktor Vermeer (58) is gisterenavond 
-              dood aangetroffen in zijn woning aan de Singel in Baarle-Nassau. De politie 
+              Kennelijk overleed de bekende journalist en grensonderzoeker Viktor Vermeer (58) 
+              gisterenavond in zijn woning aan de Singel in Baarle-Nassau. De politie 
               werd rond 21:30 uur gealarmeerd door een bezorgde buurman die al enkele dagen 
               niets van Vermeer had vernomen.
             </p>
             <p>
-              Vermeer was de afgelopen maanden bezig met een groot onderzoek naar de 
-              historische grensverdragen tussen Nederland en België. Bronnen dicht bij 
-              het onderzoek suggereren dat hij op het punt stond om &quot;explosieve 
-              onthullingen&quot; te doen over verborgen documenten.
+              Eerdere onderzoeken van Vermeer richtten zich op de historische grensverdragen 
+              tussen Nederland en België. Bronnen dicht bij het onderzoek suggereren dat hij 
+              op het punt stond om &quot;explosieve onthullingen&quot; te doen over verborgen documenten.
+            </p>
+            <p>
+              Regelmatig sprak Vermeer over zijn vondsten met lokale historici. Zijn 
+              aantekeningen zouden volgens insiders &quot;spraakmakende feiten&quot; bevatten 
+              over grondtransacties in de regio.
             </p>
           </div>
           <div className="space-y-4">
             <p>
-              De politie laat weten dat er &quot;geen aanwijzingen zijn voor een misdrijf&quot; 
-              en gaat uit van een natuurlijke doodsoorzaak. Echter, meerdere collega&apos;s 
-              van Vermeer hebben hun twijfels geuit over deze conclusie.
+              Kennissen van het slachtoffer betwijfelen de officiële verklaring. &quot;Viktor 
+              was kerngezond en had geen medische voorgeschiedenis,&quot; aldus een anonieme bron.
             </p>
             <p>
-              &quot;Viktor was kerngezond en had geen enkele medische voorgeschiedenis,&quot; 
-              aldus een anonieme bron. &quot;En hij vertelde me vorige week nog dat hij 
-              zich bedreigd voelde. Dit klopt niet.&quot;
+              Opvallend is dat Vermeer vorige week nog sprak over bedreigingen die hij zou 
+              hebben ontvangen. &quot;Hij voelde zich onveilig,&quot; vertelt een collega.
+            </p>
+            <p>
+              Nabestaanden zijn niet bereikbaar voor commentaar. De begrafenis vindt plaats 
+              op een nog nader te bepalen datum.
             </p>
             <p className="italic text-stone-600">
-              Lees meer over het leven en werk van Viktor Vermeer op pagina 4-5.
+              De redactie zal het werk van Viktor Vermeer voortzetten. Wie informatie 
+              heeft over zijn laatste onderzoek kan contact opnemen via de krant.
             </p>
           </div>
         </div>

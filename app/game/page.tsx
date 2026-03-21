@@ -24,6 +24,18 @@ function GameHomeContent() {
             >
               Onderzoek
             </Link>
+            <Link 
+              href="/game/unlock" 
+              className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
+            >
+              Codes
+            </Link>
+            <Link 
+              href="/game/tip" 
+              className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
+            >
+              Meld dader
+            </Link>
             <div className="flex items-center gap-4">
               <span className="text-stone-500 text-sm">
                 {user?.name || user?.email}
