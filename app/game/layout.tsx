@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AuthProvider } from '@/lib/auth-context';
+import { GameLayoutClient } from '@/components/game/game-layout-client';
 
 export const metadata: Metadata = {
   title: 'GeenGrens - Murder Mystery',
@@ -11,9 +11,5 @@ export default function GameLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
-  );
+  return <GameLayoutClient>{children}</GameLayoutClient>;
 }

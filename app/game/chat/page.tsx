@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
@@ -95,22 +95,18 @@ function ChatContent() {
     { revalidateOnFocus: false }
   );
 
-  // Memoize arrays to prevent unnecessary re-renders
-  const charactersList = useMemo(() => characters ?? [], [characters]);
-  const chatHistoryList = useMemo(() => chatHistory ?? [], [chatHistory]);
+  // Safe references - avoid creating new arrays on every render
+  const charactersList = characters || [];
+  const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
 
-  // Get selected character
-  const selectedCharacter = useMemo(
-    () => charactersList.find(c => c.id === selectedCharacterId),
-    [charactersList, selectedCharacterId]
-  );
-
-  // Update local messages when chat history changes
+  // Sync chat history to local state only when chatHistory reference changes and has data
+  const chatHistoryRef = useRef<ChatDTO[] | undefined>();
   useEffect(() => {
-    if (chatHistoryList.length > 0) {
-      setLocalMessages(chatHistoryList);
+    if (chatHistory && chatHistory !== chatHistoryRef.current && chatHistory.length > 0) {
+      chatHistoryRef.current = chatHistory;
+      setLocalMessages(chatHistory);
     }
-  }, [chatHistoryList]);
+  }, [chatHistory]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
