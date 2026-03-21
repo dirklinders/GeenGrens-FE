@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
@@ -11,7 +11,8 @@ import { characterApi, chatFeApi, type CharacterDTO, type ChatDTO } from '@/lib/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 // Moved outside to prevent recreation on each render
 function SidebarContent({
@@ -83,27 +84,33 @@ function ChatContent() {
   // Fetch characters
   const { data: characters, isLoading: charactersLoading } = useSWR<CharacterDTO[]>(
     'characters',
-    () => characterApi.getAll()
+    () => characterApi.getAll(),
+    { revalidateOnFocus: false }
   );
 
   // Fetch chat history for selected character
   const { data: chatHistory, mutate: mutateChatHistory } = useSWR<ChatDTO[]>(
     selectedCharacterId ? `chats-${selectedCharacterId}` : null,
-    () => selectedCharacterId ? chatFeApi.getChats(selectedCharacterId) : Promise.resolve([])
+    () => selectedCharacterId ? chatFeApi.getChats(selectedCharacterId) : Promise.resolve([]),
+    { revalidateOnFocus: false }
   );
 
-  // Memoize characters array to prevent unnecessary re-renders
-  const charactersList = characters ?? [];
+  // Memoize arrays to prevent unnecessary re-renders
+  const charactersList = useMemo(() => characters ?? [], [characters]);
+  const chatHistoryList = useMemo(() => chatHistory ?? [], [chatHistory]);
 
   // Get selected character
-  const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
+  const selectedCharacter = useMemo(
+    () => charactersList.find(c => c.id === selectedCharacterId),
+    [charactersList, selectedCharacterId]
+  );
 
   // Update local messages when chat history changes
   useEffect(() => {
-    if (chatHistory && chatHistory.length > 0) {
-      setLocalMessages(chatHistory);
+    if (chatHistoryList.length > 0) {
+      setLocalMessages(chatHistoryList);
     }
-  }, [chatHistory]);
+  }, [chatHistoryList]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -193,6 +200,9 @@ function ChatContent() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 bg-stone-900 border-stone-800">
+              <VisuallyHidden>
+                <SheetTitle>Navigatie</SheetTitle>
+              </VisuallyHidden>
               <SidebarContent
                 characters={charactersList}
                 charactersLoading={charactersLoading}

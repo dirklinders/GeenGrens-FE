@@ -2,7 +2,7 @@ import { PageLayout, BlogArticle, ImageBox } from "@/components/grensverkenner"
 
 export default function EnclavesPage() {
   return (
-    <PageLayout tagline="De Puzzel van Baarle">
+    <PageLayout tagline="De Puzzel van Baarle" showSecretLink>
       <BlogArticle date="10 MAART 2026" title="Een land binnen een land">
         <p>
           Wie door Baarle wandelt, raakt onherroepelijk gedesoriënteerd. Het is niet simpelweg 
