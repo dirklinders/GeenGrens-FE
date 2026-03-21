@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Libre_Baskerville, Inter } from 'next/font/google'
+import { Libre_Baskerville, Inter, Caveat } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -12,6 +12,12 @@ const libreBaskerville = Libre_Baskerville({
 const inter = Inter({ 
   subsets: ["latin"],
   variable: "--font-sans"
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-handwritten"
 });
 
 export const metadata: Metadata = {
@@ -44,7 +50,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl">
-      <body className={`${inter.variable} ${libreBaskerville.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${libreBaskerville.variable} ${caveat.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
