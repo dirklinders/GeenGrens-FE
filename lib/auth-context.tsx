@@ -3,6 +3,15 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { authApi, type UserInfo } from './api';
 
+// Set NEXT_PUBLIC_REQUIRE_AUTH=false to bypass authentication for testing
+const REQUIRE_AUTH = process.env.NEXT_PUBLIC_REQUIRE_AUTH !== 'false';
+
+const MOCK_USER: UserInfo = {
+  id: 'mock-user-id',
+  email: 'test@example.com',
+  name: 'Test User',
+};
+
 interface AuthContextType {
   user: UserInfo | null;
   isLoading: boolean;
@@ -20,6 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = useCallback(async () => {
+    // If auth is disabled, use mock user
+    if (!REQUIRE_AUTH) {
+      setUser(MOCK_USER);
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const userInfo = await authApi.isAuthenticated();
       setUser(userInfo);
