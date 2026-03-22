@@ -1,40 +1,40 @@
-import { cn } from "@/lib/utils"
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
-interface ImageBoxProps {
-  caption: string
-  large?: boolean
-  className?: string
-}
+type ImageBoxProps = {
+  src: string;
+  caption?: string;
+  title?: string;
+  className?: string;
+};
 
-export function ImageBox({ caption, large = false, className }: ImageBoxProps) {
+export function ImageBox({ src, caption, title, className }: ImageBoxProps) {
   return (
-    <figure
-      className={cn(
-        "my-8 overflow-hidden rounded-lg border border-border bg-secondary",
-        large ? "aspect-video" : "aspect-[4/3]",
-        className
+    <figure className={cn('my-6', className)}>
+      {/* Optional top title */}
+      {title && (
+        <p className="mb-3 text-center text-sm italic text-muted-foreground">
+          {title}
+        </p>
       )}
-    >
-      <div className="flex h-full items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          <svg
-            className="mx-auto h-12 w-12 opacity-50"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-        </div>
+
+      {/* Image container with rounded corners */}
+      <div className="w-full overflow-hidden rounded-2xl">
+        <Image
+          src={src}
+          alt={caption || 'image'}
+          width={1200}         // original image width
+          height={800}         // original image height
+          style={{ width: '100%', height: 'auto' }} // full width, auto scale height
+        />
       </div>
-      <figcaption className="border-t border-border bg-card px-4 py-3 text-center text-sm italic text-muted-foreground">
-        {caption}
-      </figcaption>
+
+      {/* Optional bottom caption */}
+      {caption && (
+        <figcaption className="mt-2 text-center text-sm italic text-muted-foreground">
+          {caption}
+        </figcaption>
+      )}
     </figure>
-  )
+  );
 }

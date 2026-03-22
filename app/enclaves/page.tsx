@@ -12,7 +12,7 @@ export default function EnclavesPage() {
 
         <ImageBox 
           caption="De waanzinnige complexiteit van de grenslijnen in het centrum." 
-          large 
+          src="/images/pages/enclaves.jpeg"
         />
 
         <p>
