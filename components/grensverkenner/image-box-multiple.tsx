@@ -26,7 +26,9 @@ export function ImageBoxMultiple({ title, height = 64, images }: ImageBoxProps) 
       <div className="grid gap-4 sm:grid-cols-2">
         {images.map((img, i) => (
           <div key={i} className="text-center">            
-            <div className={`relative h-${height} w-full overflow-hidden rounded-lg`}>
+            <div className={`relative  w-full overflow-hidden rounded-lg`}
+                 style={{ height: `${height}rem` }}
+            >
               <Image
                 src={img.src}
                 alt={img.caption || `image-${i}`}

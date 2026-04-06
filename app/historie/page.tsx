@@ -12,7 +12,7 @@ export default function HistoriePage() {
 
         <ImageBoxMultiple
           title="De heren in kwestie, wiens strijd tot deze chaos heeft geleid."
-          height={100}
+          height={24}
           images={[
             {
               src: "/images/pages/hendrik1.jpg",

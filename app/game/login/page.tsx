@@ -48,7 +48,7 @@ function LoginForm() {
   };
 
   const handleGoogleLogin = () => {
-    const fullReturnUrl = `${window.location.origin}${returnUrl}`;
+    const fullReturnUrl = `${returnUrl}`;
     loginWithGoogle(fullReturnUrl);
   };
 
