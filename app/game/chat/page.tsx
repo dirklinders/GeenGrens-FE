@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { ChatMessage } from '@/components/game/chat-message';
 import { CharacterSelector } from '@/components/game/character-selector';
+import { GameHeader } from '@/components/game/game-header';
 import { useAuth } from '@/lib/auth-context';
 import { characterApi, chatFeApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 // Moved outside to prevent recreation on each render
 function SidebarContent({
@@ -33,10 +31,8 @@ function SidebarContent({
   return (
     <div className="h-full flex flex-col bg-stone-900">
       <div className="p-4 border-b border-stone-800">
-        <Link href="/game" className="font-serif text-xl text-stone-100">
-          GeenGrens
-        </Link>
-        <p className="text-xs text-stone-500 mt-1">Onderzoek de moord op Viktor Vermeer</p>
+        <h2 className="font-serif text-xl text-stone-100">Verdachten</h2>
+        <p className="text-xs text-stone-500 mt-1">Selecteer iemand om te ondervragen</p>
       </div>
       
       <ScrollArea className="flex-1 p-4">
@@ -168,74 +164,70 @@ function ChatContent() {
     }
   };
 
+  const mobileMenuContent = (
+    <SidebarContent
+      characters={charactersList}
+      charactersLoading={charactersLoading}
+      selectedCharacterId={selectedCharacterId}
+      onSelectCharacter={handleSelectCharacter}
+      user={user}
+      onLogout={logout}
+    />
+  );
+
   return (
-    <div className="h-screen bg-stone-950 flex">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:block w-72 border-r border-stone-800 flex-shrink-0">
-        <SidebarContent
-          characters={charactersList}
-          charactersLoading={charactersLoading}
-          selectedCharacterId={selectedCharacterId}
-          onSelectCharacter={handleSelectCharacter}
-          user={user}
-          onLogout={logout}
-        />
-      </aside>
+    <div className="h-screen bg-stone-950 flex flex-col">
+      {/* Consistent Header with hamburger menu */}
+      <GameHeader 
+        showMobileMenu 
+        mobileMenuContent={mobileMenuContent}
+        mobileMenuOpen={sidebarOpen}
+        onMobileMenuChange={setSidebarOpen}
+      />
 
-      {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="bg-stone-900 border-b border-stone-800 p-4 flex items-center gap-4">
-          {/* Mobile menu button */}
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden text-stone-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-stone-900 border-stone-800">
-              <VisuallyHidden>
-                <SheetTitle>Navigatie</SheetTitle>
-              </VisuallyHidden>
-              <SidebarContent
-                characters={charactersList}
-                charactersLoading={charactersLoading}
-                selectedCharacterId={selectedCharacterId}
-                onSelectCharacter={handleSelectCharacter}
-                user={user}
-                onLogout={logout}
-              />
-            </SheetContent>
-          </Sheet>
+      <div className="flex-1 flex overflow-hidden">
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:block w-72 border-r border-stone-800 flex-shrink-0">
+          <SidebarContent
+            characters={charactersList}
+            charactersLoading={charactersLoading}
+            selectedCharacterId={selectedCharacterId}
+            onSelectCharacter={handleSelectCharacter}
+            user={user}
+            onLogout={logout}
+          />
+        </aside>
 
-          {selectedCharacter ? (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-900 flex items-center justify-center text-red-100 font-medium">
-                {selectedCharacter.avatarUrl ? (
-                  <img 
-                    src={selectedCharacter.avatarUrl} 
-                    alt={selectedCharacter.name || ''} 
-                    className="w-full h-full rounded-full object-cover" 
-                  />
-                ) : (
-                  selectedCharacter.name?.charAt(0) || '?'
-                )}
+        {/* Main Chat Area */}
+        <main className="flex-1 flex flex-col min-w-0">
+          {/* Selected character info bar */}
+          <div className="bg-stone-900/50 border-b border-stone-800 p-4 flex items-center gap-4">
+            {selectedCharacter ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-900 flex items-center justify-center text-red-100 font-medium">
+                  {selectedCharacter.avatarUrl ? (
+                    <img 
+                      src={selectedCharacter.avatarUrl} 
+                      alt={selectedCharacter.name || ''} 
+                      className="w-full h-full rounded-full object-cover" 
+                    />
+                  ) : (
+                    selectedCharacter.name?.charAt(0) || '?'
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-stone-100 font-medium">
+                    {selectedCharacter.name}
+                  </h1>
+                  <p className="text-xs text-stone-500">
+                    {selectedCharacter.description || 'Verdachte'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-stone-100 font-medium">
-                  {selectedCharacter.name}
-                </h1>
-                <p className="text-xs text-stone-500">
-                  {selectedCharacter.description || 'Verdachte'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <h1 className="text-stone-400">Selecteer een verdachte</h1>
-          )}
-        </header>
+            ) : (
+              <h1 className="text-stone-400">Selecteer een verdachte</h1>
+            )}
+          </div>
 
         {/* Messages Area */}
         <ScrollArea className="flex-1 p-4">
@@ -313,7 +305,8 @@ function ChatContent() {
             </Button>
           </form>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

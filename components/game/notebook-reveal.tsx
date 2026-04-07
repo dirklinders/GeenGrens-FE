@@ -1,8 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-
 interface NotebookRevealProps {
   location: string;
 }
@@ -34,20 +31,6 @@ export function NotebookReveal({ location }: NotebookRevealProps) {
           {/* Instructions - handwritten yellow */}
           <div className="font-[family-name:var(--font-handwritten)] text-lg text-amber-300/90 leading-relaxed">
             <p>In mijn notitieboekje heb ik om de achtervolgers te slim af te zijn steeds een andere vercijfering gebruikt. Ik hoop dat je slim genoeg bent om de puzzels op te lossen en in mijn voetsporen te treden.</p>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button asChild className="flex-1 bg-amber-700 hover:bg-amber-600">
-              <Link href="/game/unlock">
-                Code invoeren
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="flex-1 border-stone-700 text-stone-300 hover:bg-stone-800">
-              <Link href="/game/chat">
-                Ondervragen
-              </Link>
-            </Button>
           </div>
         </div>
       </div>
