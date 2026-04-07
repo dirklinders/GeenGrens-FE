@@ -1,13 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { AuthGuard } from '@/components/game/auth-guard';
-import { NewspaperHeadline } from '@/components/game/newspaper-headline';
+import { SecretMessage } from '@/components/game/secret-message';
+import { NotebookReveal } from '@/components/game/notebook-reveal';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 
 function GameHomeContent() {
   const { user, logout } = useAuth();
+  const [notebookLocation, setNotebookLocation] = useState<string | null>(null);
+
+  const handlePasswordSuccess = (location: string) => {
+    setNotebookLocation(location);
+  };
 
   return (
     <div className="min-h-screen bg-stone-950">
@@ -17,7 +24,7 @@ function GameHomeContent() {
           <Link href="/game" className="font-serif text-xl text-stone-100">
             GeenGrens
           </Link>
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-4 md:gap-6">
             <Link 
               href="/game/chat" 
               className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
@@ -36,7 +43,7 @@ function GameHomeContent() {
             >
               Meld dader
             </Link>
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               <span className="text-stone-500 text-sm">
                 {user?.name || user?.email}
               </span>
@@ -54,15 +61,15 @@ function GameHomeContent() {
       </header>
 
       {/* Main content */}
-      <main className="py-12 px-4">
-        {/* Newspaper */}
-        <div className="mb-12">
-          <NewspaperHeadline />
+      <main className="py-8 md:py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          {notebookLocation ? (
+            <NotebookReveal location={notebookLocation} />
+          ) : (
+            <SecretMessage onSuccess={handlePasswordSuccess} />
+          )}
         </div>
-
-       
       </main>
-
     </div>
   );
 }

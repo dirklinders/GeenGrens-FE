@@ -145,3 +145,19 @@ export const storyApi = {
   delete: (id: number) =>
     fetchApi<void>(`/api/Story/${id}`, { method: 'DELETE' }),
 };
+
+// Game endpoints
+export interface PasswordResponse {
+  success: boolean;
+  notebookLocation?: string;
+}
+
+export const gameApi = {
+  verifyPassword: (password: string) =>
+    fetchApi<PasswordResponse>('/api/Game/VerifyPassword', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+  getNotebookLocation: () =>
+    fetchApi<{ location: string }>('/api/Game/NotebookLocation'),
+};
