@@ -152,6 +152,11 @@ export interface PasswordResponse {
   notebookLocation?: string;
 }
 
+export interface GameStatusResponse {
+  isUnlocked: boolean;
+  notebookLocation?: string;
+}
+
 export const gameApi = {
   verifyPassword: (password: string) =>
     fetchApi<PasswordResponse>('/api/Game/VerifyPassword', {
@@ -160,4 +165,6 @@ export const gameApi = {
     }),
   getNotebookLocation: () =>
     fetchApi<{ location: string }>('/api/Game/NotebookLocation'),
+  getGameStatus: () =>
+    fetchApi<GameStatusResponse>('/api/Game/Status'),
 };

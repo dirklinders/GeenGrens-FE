@@ -1,20 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { SecretMessage } from '@/components/game/secret-message';
 import { NotebookReveal } from '@/components/game/notebook-reveal';
 import { useAuth } from '@/lib/auth-context';
+import { gameApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 
 function GameHomeContent() {
   const { user, logout } = useAuth();
   const [notebookLocation, setNotebookLocation] = useState<string | null>(null);
 
+  // Check if game is already unlocked
+  const { data: gameStatus, isLoading: statusLoading } = useSWR(
+    'game-status',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
+
+  // Set notebook location if already unlocked
+  useEffect(() => {
+    if (gameStatus?.isUnlocked && gameStatus?.notebookLocation) {
+      setNotebookLocation(gameStatus.notebookLocation);
+    }
+  }, [gameStatus]);
+
   const handlePasswordSuccess = (location: string) => {
     setNotebookLocation(location);
   };
+
+  // Show loading while checking status
+  if (statusLoading) {
+    return (
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
+        <div className="animate-pulse text-stone-400 font-serif text-lg">
+          Laden...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-stone-950">
