@@ -6,7 +6,6 @@ import { AuthGuard } from '@/components/game/auth-guard';
 import { ChatMessage } from '@/components/game/chat-message';
 import { CharacterSelector } from '@/components/game/character-selector';
 import { GameHeader } from '@/components/game/game-header';
-import { useAuth } from '@/lib/auth-context';
 import { characterApi, chatFeApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,15 +17,11 @@ function SidebarContent({
   charactersLoading,
   selectedCharacterId,
   onSelectCharacter,
-  user,
-  onLogout,
 }: {
   characters: CharacterDTO[];
   charactersLoading: boolean;
   selectedCharacterId: number | null;
   onSelectCharacter: (id: number) => void;
-  user: { name?: string; email?: string } | null;
-  onLogout: () => void;
 }) {
   return (
     <div className="h-full flex flex-col bg-stone-900">
@@ -50,26 +45,11 @@ function SidebarContent({
           />
         )}
       </ScrollArea>
-
-      <div className="p-4 border-t border-stone-800 space-y-2">
-        <div className="text-xs text-stone-500 truncate">
-          {user?.name || user?.email}
-        </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onLogout}
-          className="w-full text-stone-400 hover:text-stone-100 hover:bg-stone-800 justify-start"
-        >
-          Uitloggen
-        </Button>
-      </div>
     </div>
   );
 }
 
 function ChatContent() {
-  const { user, logout } = useAuth();
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -170,8 +150,6 @@ function ChatContent() {
       charactersLoading={charactersLoading}
       selectedCharacterId={selectedCharacterId}
       onSelectCharacter={handleSelectCharacter}
-      user={user}
-      onLogout={logout}
     />
   );
 
@@ -193,8 +171,6 @@ function ChatContent() {
             charactersLoading={charactersLoading}
             selectedCharacterId={selectedCharacterId}
             onSelectCharacter={handleSelectCharacter}
-            user={user}
-            onLogout={logout}
           />
         </aside>
 

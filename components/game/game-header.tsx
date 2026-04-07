@@ -23,6 +23,7 @@ export function GameHeader({
 
   return (
     <header className="bg-stone-900 border-b border-stone-800 sticky top-0 z-50">
+      {/* Main header row */}
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Mobile menu button */}
@@ -51,31 +52,36 @@ export function GameHeader({
         
         <nav className="flex items-center gap-4 md:gap-6">
           <Link 
-            href="/game/unlock" 
-            className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
-          >
-            Codes
-          </Link>
-          <Link 
             href="/game/tip" 
             className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
           >
             Meld dader
           </Link>
-          <div className="hidden md:flex items-center gap-4">
-            <span className="text-stone-500 text-sm">
+        </nav>
+      </div>
+
+      {/* Subheader with team info, user name and logout */}
+      <div className="bg-stone-950/50 border-t border-stone-800/50">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-4 text-sm">
+            {user?.teamName && (
+              <span className="text-amber-600 font-medium">
+                {user.teamName}
+              </span>
+            )}
+            <span className="text-stone-500">
               {user?.name || user?.email}
             </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={logout}
-              className="text-stone-400 hover:text-stone-100 hover:bg-stone-800"
-            >
-              Uitloggen
-            </Button>
           </div>
-        </nav>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={logout}
+            className="text-stone-500 hover:text-stone-100 hover:bg-stone-800 text-xs h-7"
+          >
+            Uitloggen
+          </Button>
+        </div>
       </div>
     </header>
   );
