@@ -69,11 +69,6 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
             <p className="mt-2">De sukkels die achter me aan zitten zijn niet zo slim,</p>
             <p className="mt-2">vul daarom hieronder het wachtwoord in.</p>
           </div>
-          
-          {/* Small hint about mirror */}
-          <p className="text-stone-600 text-xs text-center italic">
-            (Tip: houd dit tegen een spiegel)
-          </p>
         </div>
       </div>
 
@@ -83,7 +78,7 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
           value={password}
           onChange={setPassword}
           onSubmit={handleSubmit}
-          maxLength={6}
+          maxLength={4}
           disabled={isLoading}
           shake={shake}
         />
@@ -102,7 +97,7 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
       <div className="bg-stone-900/30 border border-stone-800 rounded-lg p-6 md:p-8">
         <div className="space-y-4">
           <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300">
-            Er zijn bij elkaar opgeteld 7 mogelijke interessante bedrijven:
+            Het <span className="underline">Product</span> van mijn onderzoek geeft 7 locaties:
           </p>
           
           <ul className="space-y-2 font-mono text-stone-400">
@@ -116,7 +111,7 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
           </ul>
           
           <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300 mt-4">
-            Ik tel op je!
+            Ze keren elkaar tegen mij.
           </p>
         </div>
 
