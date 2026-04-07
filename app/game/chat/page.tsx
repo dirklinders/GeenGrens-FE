@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { ChatMessage } from '@/components/game/chat-message';
 import { CharacterSelector } from '@/components/game/character-selector';
 import { GameHeader } from '@/components/game/game-header';
-import { characterApi, chatFeApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
+import { characterApi, chatFeApi, gameApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -50,12 +51,27 @@ function SidebarContent({
 }
 
 function ChatContent() {
+  const router = useRouter();
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localMessages, setLocalMessages] = useState<ChatDTO[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Check access permission
+  const { data: gameStatus, isLoading: statusLoading } = useSWR(
+    'game-status-chat',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
+
+  // Redirect if not allowed to access chat
+  useEffect(() => {
+    if (!statusLoading && gameStatus && !gameStatus.canAccessChat) {
+      router.push('/game');
+    }
+  }, [gameStatus, statusLoading, router]);
 
   // Fetch characters
   const { data: characters, isLoading: charactersLoading } = useSWR<CharacterDTO[]>(

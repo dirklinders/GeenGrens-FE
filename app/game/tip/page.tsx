@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
+import { gameApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -21,11 +24,26 @@ const SUSPECTS = [
 ];
 
 function TipContent() {
+  const router = useRouter();
   const [selectedSuspect, setSelectedSuspect] = useState('');
   const [motive, setMotive] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Check access permission
+  const { data: gameStatus, isLoading: statusLoading } = useSWR(
+    'game-status-tip',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
+
+  // Redirect if not allowed to submit tips
+  useEffect(() => {
+    if (!statusLoading && gameStatus && !gameStatus.canSubmitTip) {
+      router.push('/game');
+    }
+  }, [gameStatus, statusLoading, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

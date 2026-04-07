@@ -156,6 +156,8 @@ export interface PasswordResponse {
 export interface GameStatusResponse {
   isUnlocked: boolean;
   notebookLocation?: string;
+  canAccessChat?: boolean;
+  canSubmitTip?: boolean;
 }
 
 export const gameApi = {

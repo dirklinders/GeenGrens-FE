@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import useSWR from 'swr';
 import { useAuth } from '@/lib/auth-context';
+import { gameApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -20,6 +22,16 @@ export function GameHeader({
   onMobileMenuChange
 }: GameHeaderProps) {
   const { user, logout } = useAuth();
+  
+  // Fetch game status for conditional navigation
+  const { data: gameStatus } = useSWR(
+    'game-status-header',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
+
+  const canAccessChat = gameStatus?.canAccessChat ?? false;
+  const canSubmitTip = gameStatus?.canSubmitTip ?? false;
 
   return (
     <header className="bg-stone-900 border-b border-stone-800 sticky top-0 z-50">
@@ -51,12 +63,22 @@ export function GameHeader({
         </div>
         
         <nav className="flex items-center gap-4 md:gap-6">
-          <Link 
-            href="/game/tip" 
-            className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
-          >
-            Meld dader
-          </Link>
+          {canAccessChat && (
+            <Link 
+              href="/game/chat" 
+              className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
+            >
+              Onderzoek
+            </Link>
+          )}
+          {canSubmitTip && (
+            <Link 
+              href="/game/tip" 
+              className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
+            >
+              Meld dader
+            </Link>
+          )}
         </nav>
       </div>
 
