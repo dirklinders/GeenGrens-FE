@@ -5,9 +5,10 @@ import { Footer } from "./footer"
 interface PageLayoutProps {
   children: React.ReactNode
   tagline?: string
+  showSecretLink?: boolean
 }
 
-export function PageLayout({ children, tagline }: PageLayoutProps) {
+export function PageLayout({ children, tagline, showSecretLink }: PageLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header tagline={tagline} />
@@ -17,7 +18,7 @@ export function PageLayout({ children, tagline }: PageLayoutProps) {
           {children}
         </div>
       </main>
-      <Footer />
+      <Footer showSecretLink={showSecretLink} />
     </div>
   )
 }

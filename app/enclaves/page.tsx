@@ -2,8 +2,8 @@ import { PageLayout, BlogArticle, ImageBox } from "@/components/grensverkenner"
 
 export default function EnclavesPage() {
   return (
-    <PageLayout tagline="De Puzzel van Baarle">
-      <BlogArticle date="10 MAART 2026" title="Een land binnen een land">
+    <PageLayout tagline="De Puzzel van Baarle" showSecretLink>
+      <BlogArticle date="20 APRIL 2026" title="Een land binnen een land">
         <p>
           Wie door Baarle wandelt, raakt onherroepelijk gedesoriënteerd. Het is niet simpelweg 
           één grens die het dorp doormidden snijdt; het is een lappendeken. Er zijn 22 Belgische 
@@ -12,11 +12,11 @@ export default function EnclavesPage() {
 
         <ImageBox 
           caption="De waanzinnige complexiteit van de grenslijnen in het centrum." 
-          large 
+          src="/images/pages/enclaves.jpeg"
         />
 
         <p>
-          Maar de echte fascinatie zit in de details: de zogenaamde <strong>counter-enclaves</strong>. 
+          Maar de echte fascinatie zit in de details: de zogenaamde <strong>&copy;ounter-enclaves</strong>. 
           Binnen de Belgische enclaves liggen namelijk weer zeven stukjes Nederlands grondgebied. 
           Het is een geografische &lsquo;Inception&rsquo;. Je bevindt je in Nederland, binnen een stukje 
           België, dat weer volledig omsloten is door Nederland.
