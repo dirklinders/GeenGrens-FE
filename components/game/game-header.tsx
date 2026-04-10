@@ -32,6 +32,7 @@ export function GameHeader({
 
   const canAccessChat = gameStatus?.canAccessChat ?? false;
   const canSubmitTip = gameStatus?.canSubmitTip ?? false;
+  const isPlaytest = gameStatus?.isPlaytest ?? false;
 
   return (
     <header className="bg-stone-900 border-b border-stone-800 sticky top-0 z-50">
@@ -63,20 +64,37 @@ export function GameHeader({
         </div>
         
         <nav className="flex items-center gap-4 md:gap-6">
+          {isPlaytest && (
+            <Link
+              href="/game/notebook"
+              className="text-amber-600 hover:text-amber-400 transition-colors text-sm"
+              title="Digitale playtestversie van het notitieboek"
+            >
+              📓 Notitieboek
+            </Link>
+          )}
           {canAccessChat && (
-            <Link 
-              href="/game/chat" 
+            <Link
+              href="/game/chat"
               className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
             >
               Onderzoek
             </Link>
           )}
           {canSubmitTip && (
-            <Link 
-              href="/game/tip" 
+            <Link
+              href="/game/tip"
               className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
             >
               Meld dader
+            </Link>
+          )}
+          {user?.isAdmin && (
+            <Link
+              href="/game/admin"
+              className="text-red-700 hover:text-red-500 transition-colors text-sm font-medium"
+            >
+              Admin
             </Link>
           )}
         </nav>

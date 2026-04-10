@@ -5,16 +5,12 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
-import { gameApi } from '@/lib/api';
+import { gameApi, tipApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-
-// The correct answers
-const CORRECT_KILLER = 'cafe-eigenaar';
-const CORRECT_MOTIVE_KEYWORDS = ['aandacht', 'zaak', 'failliet', 'failliete', 'verliep', 'publiciteit'];
 
 const SUSPECTS = [
   { id: 'burgemeester', name: 'Burgemeester Van Dijk', description: 'Betrokken bij de grondtransactie 20 jaar geleden' },
@@ -27,9 +23,10 @@ function TipContent() {
   const router = useRouter();
   const [selectedSuspect, setSelectedSuspect] = useState('');
   const [motive, setMotive] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [result, setResult] = useState<{ isCorrect: boolean; alreadySubmitted: boolean } | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Check access permission
   const { data: gameStatus, isLoading: statusLoading } = useSWR(
@@ -47,25 +44,36 @@ function TipContent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedSuspect || !motive.trim()) {
-      return;
-    }
-
+    if (!selectedSuspect || !motive.trim()) return;
     setShowConfirmation(true);
   };
 
-  const confirmSubmission = () => {
-    const killerCorrect = selectedSuspect === CORRECT_KILLER;
-    const motiveWords = motive.toLowerCase();
-    const motiveCorrect = CORRECT_MOTIVE_KEYWORDS.some(keyword => motiveWords.includes(keyword));
-    
-    setIsCorrect(killerCorrect && motiveCorrect);
-    setIsSubmitted(true);
+  const confirmSubmission = async () => {
     setShowConfirmation(false);
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const res = await tipApi.submit(selectedSuspect, motive);
+      setResult(res);
+    } catch {
+      setSubmitError('Er is een fout opgetreden bij het indienen van de melding. Probeer het opnieuw.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (isSubmitted) {
+  if (isSubmitting) {
+    return (
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center p-4">
+        <div className="text-stone-400 font-serif text-lg animate-pulse">Melding wordt ingediend...</div>
+      </div>
+    );
+  }
+
+  if (result) {
+    const { isCorrect } = result;
+
     return (
       <div className="min-h-screen bg-stone-950 flex items-center justify-center p-4">
         <Card className="bg-stone-900 border-stone-800 max-w-xl w-full">
@@ -78,16 +86,16 @@ function TipContent() {
                 </h2>
                 <div className="text-stone-400 space-y-4">
                   <p>
-                    Je had gelijk. <strong className="text-stone-200">Piet Jansen</strong>, de cafe-eigenaar, 
+                    Je had gelijk. <strong className="text-stone-200">Piet Jansen</strong>, de cafe-eigenaar,
                     heeft Viktor Vermeer vermoord.
                   </p>
                   <p>
-                    Zijn zaak liep slecht en hij zag de onthulling van het grondschandaal als een 
-                    manier om aandacht te genereren. Toen Viktor werd afgekocht en zweeg, besloot 
+                    Zijn zaak liep slecht en hij zag de onthulling van het grondschandaal als een
+                    manier om aandacht te genereren. Toen Viktor werd afgekocht en zweeg, besloot
                     Piet het heft in eigen handen te nemen.
                   </p>
                   <p>
-                    Door Viktor te vermoorden en het te laten lijken op een misdrijf, hoopte hij 
+                    Door Viktor te vermoorden en het te laten lijken op een misdrijf, hoopte hij
                     dat de media-aandacht zijn cafe zou redden. Een wanhopige daad van een wanhopige man.
                   </p>
                 </div>
@@ -105,7 +113,7 @@ function TipContent() {
                 </h2>
                 <div className="text-stone-400 space-y-4">
                   <p>
-                    Je beschuldiging was onjuist. De politie heeft je tip onderzocht, maar er is 
+                    Je beschuldiging was onjuist. De politie heeft je tip onderzocht, maar er is
                     onvoldoende bewijs om deze persoon aan te houden.
                   </p>
                   <p>
@@ -115,10 +123,6 @@ function TipContent() {
                 <div className="pt-4 border-t border-stone-800 space-y-3">
                   <p className="text-red-400 font-medium">
                     Je had maar een kans. De zaak is nu gesloten.
-                  </p>
-                  <p className="text-stone-500 text-sm">
-                    (Tip: De dader is de cafe-eigenaar. Zijn zaak verliep en hij wilde meer 
-                    aandacht voor de onthullingen genereren.)
                   </p>
                 </div>
               </>
@@ -141,6 +145,12 @@ function TipContent() {
           </p>
         </div>
 
+        {submitError && (
+          <div className="bg-red-950 border border-red-800 rounded px-4 py-3 mb-6">
+            <p className="text-red-400 text-sm">{submitError}</p>
+          </div>
+        )}
+
         <Card className="bg-stone-900 border-stone-800">
           <CardHeader>
             <CardTitle className="font-serif text-2xl text-stone-100">
@@ -155,25 +165,25 @@ function TipContent() {
               {/* Suspect selection */}
               <div className="space-y-3">
                 <Label className="text-stone-200 text-base">Wie is de moordenaar?</Label>
-                <RadioGroup 
-                  value={selectedSuspect} 
+                <RadioGroup
+                  value={selectedSuspect}
                   onValueChange={setSelectedSuspect}
                   className="space-y-2"
                 >
                   {SUSPECTS.map((suspect) => (
-                    <div 
+                    <div
                       key={suspect.id}
                       className="flex items-start space-x-3 bg-stone-800 p-4 rounded cursor-pointer hover:bg-stone-750 transition-colors"
                       onClick={() => setSelectedSuspect(suspect.id)}
                     >
-                      <RadioGroupItem 
-                        value={suspect.id} 
+                      <RadioGroupItem
+                        value={suspect.id}
                         id={suspect.id}
                         className="mt-1 border-stone-600 text-red-600"
                       />
                       <div>
-                        <Label 
-                          htmlFor={suspect.id} 
+                        <Label
+                          htmlFor={suspect.id}
                           className="text-stone-100 font-medium cursor-pointer"
                         >
                           {suspect.name}
@@ -202,7 +212,7 @@ function TipContent() {
                 </p>
               </div>
 
-              <Button 
+              <Button
                 type="submit"
                 disabled={!selectedSuspect || !motive.trim()}
                 className="w-full bg-red-800 hover:bg-red-700 text-stone-100 font-medium py-6"
@@ -224,22 +234,24 @@ function TipContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-stone-400">
-                  Je staat op het punt om <strong className="text-stone-200">
-                    {SUSPECTS.find(s => s.id === selectedSuspect)?.name}
-                  </strong> te beschuldigen van moord.
+                  Je staat op het punt om{' '}
+                  <strong className="text-stone-200">
+                    {SUSPECTS.find((s) => s.id === selectedSuspect)?.name}
+                  </strong>{' '}
+                  te beschuldigen van moord.
                 </p>
                 <p className="text-red-400 text-sm">
                   Dit is je enige kans. Als je verkeerd zit, blijft de moordenaar vrij.
                 </p>
                 <div className="flex gap-3 pt-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setShowConfirmation(false)}
                     className="flex-1 border-stone-700 text-stone-300 hover:bg-stone-800"
                   >
                     Annuleren
                   </Button>
-                  <Button 
+                  <Button
                     onClick={confirmSubmission}
                     className="flex-1 bg-red-800 hover:bg-red-700 text-stone-100"
                   >

@@ -7,9 +7,10 @@ interface ChatMessageProps {
   message: string;
   characterName?: string;
   characterAvatar?: string;
+  isStreaming?: boolean;
 }
 
-export function ChatMessage({ role, message, characterName, characterAvatar }: ChatMessageProps) {
+export function ChatMessage({ role, message, characterName, characterAvatar, isStreaming }: ChatMessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -48,6 +49,9 @@ export function ChatMessage({ role, message, characterName, characterAvatar }: C
           )}
         >
           {message}
+          {isStreaming && (
+            <span className="inline-block w-1.5 h-4 bg-stone-400 ml-0.5 align-middle animate-pulse rounded-sm" />
+          )}
         </div>
       </div>
     </div>

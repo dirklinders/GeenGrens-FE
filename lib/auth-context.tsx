@@ -10,6 +10,7 @@ const MOCK_USER: UserInfo = {
   id: 'mock-user-id',
   email: 'test@example.com',
   name: 'Test User',
+  isAdmin: true,
 };
 
 interface AuthContextType {
