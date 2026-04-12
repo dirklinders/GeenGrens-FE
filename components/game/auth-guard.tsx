@@ -18,7 +18,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     
     if (!isLoading && !isAuthenticated) {
       const returnUrl = encodeURIComponent(pathname);
-      router.push(`/game/login?returnUrl=${returnUrl}`);
+      router.push(`/login?returnUrl=${returnUrl}`);
     }
   }, [isAuthenticated, isLoading, router, pathname]);
 
