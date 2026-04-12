@@ -1,5 +1,5 @@
 import Link from 'next/link';
-
+const GAME_URL = process.env.NEXT_PUBLIC_GAME_URL || 'https://localhost:3000';
 interface FooterProps {
   showSecretLink?: boolean;
 }
@@ -10,7 +10,7 @@ export function Footer({ showSecretLink = false }: FooterProps) {
       <div className="mx-auto max-w-2xl px-4 py-6 text-center text-sm text-muted-foreground">
         {showSecretLink ? (
           <Link 
-            href="/game" 
+            href={GAME_URL}
             className="hover:text-accent transition-colors cursor-default"
             title=""
           >
