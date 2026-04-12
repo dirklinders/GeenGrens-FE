@@ -58,15 +58,15 @@ export function GameHeader({
             </Sheet>
           )}
           
-          <Link href="/game" className="font-serif text-xl text-stone-100">
+          <Link href="/" className="font-serif text-xl text-stone-100">
             GeenGrens
           </Link>
         </div>
-        
+
         <nav className="flex items-center gap-4 md:gap-6">
           {isPlaytest && (
             <Link
-              href="/game/notebook"
+              href="/notebook"
               className="text-amber-600 hover:text-amber-400 transition-colors text-sm"
               title="Digitale playtestversie van het notitieboek"
             >
@@ -75,7 +75,7 @@ export function GameHeader({
           )}
           {canAccessChat && (
             <Link
-              href="/game/chat"
+              href="/chat"
               className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
             >
               Onderzoek
@@ -83,7 +83,7 @@ export function GameHeader({
           )}
           {canSubmitTip && (
             <Link
-              href="/game/tip"
+              href="/tip"
               className="text-stone-400 hover:text-stone-100 transition-colors text-sm"
             >
               Meld dader
@@ -91,7 +91,7 @@ export function GameHeader({
           )}
           {user?.isAdmin && (
             <Link
-              href="/game/admin"
+              href="/admin"
               className="text-red-700 hover:text-red-500 transition-colors text-sm font-medium"
             >
               Admin

@@ -1,38 +1,67 @@
-import { PageLayout, BlogArticle } from "@/components/grensverkenner"
-import Image from 'next/image'
-export default function Home() {
-  return (
-    <PageLayout tagline="Observaties van Viktor Vermeer">
-      {/* Bio Section */}
-      <section className="mb-10 flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
-        <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full">
-          <Image
-            src="/images/pages/ViktorVermeer_Headshot.png"
-            alt="Viktor Vermeer"
-            fill
-            className="object-cover"
-          />
-        </div>
-        <div>
-          <h2 className="font-serif text-xl font-bold text-foreground">Viktor Vermeer</h2>
-          <p className="text-sm text-muted-foreground">Onderzoeksjournalist Geografie</p>
-        </div>
-      </section>
+'use client';
 
-      {/* Blog Post */}
-      <BlogArticle date="10 MAART 2026" title="De schoonheid van een versnipperd dorp">
-        <p>
-          Mijn naam is Viktor Vermeer en ik ben verliefd op een grens. Wat voor velen een
-          administratieve hoofdpijn lijkt, zie ik als een prachtig historisch monument.
-          Baarle-Nassau en Baarle-Hertog vormen samen de meest complexe grensstructuur ter wereld.
-        </p>
-        <p>
-          Hier vind je geen muren, maar witte kruizen die dwars door huizen en tuinen lopen.
-          Het is een plek waar de logica soms ver te zoeken is, maar waar de menselijke
-          geschiedenis tastbaar wordt in elke stoeptegel. Op deze site leg ik vast wat dit
-          dorp zo uniek maakt.
-        </p>
-      </BlogArticle>
-    </PageLayout>
-  )
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
+import { AuthGuard } from '@/components/game/auth-guard';
+import { SecretMessage } from '@/components/game/secret-message';
+import { NotebookReveal } from '@/components/game/notebook-reveal';
+import { GameHeader } from '@/components/game/game-header';
+import { gameApi } from '@/lib/api';
+
+function GameHomeContent() {
+  const [notebookLocation, setNotebookLocation] = useState<string | null>(null);
+
+  // Check if game is already unlocked
+  const { data: gameStatus, isLoading: statusLoading } = useSWR(
+    'game-status',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
+
+  // Set notebook location if already unlocked
+  useEffect(() => {
+    if (gameStatus?.isUnlocked && gameStatus?.notebookLocation) {
+      setNotebookLocation(gameStatus.notebookLocation);
+    }
+  }, [gameStatus]);
+
+  const handlePasswordSuccess = (location: string) => {
+    setNotebookLocation(location);
+  };
+
+  // Show loading while checking status
+  if (statusLoading) {
+    return (
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
+        <div className="animate-pulse text-stone-400 font-serif text-lg">
+          Laden...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-stone-950">
+      <GameHeader />
+
+      {/* Main content */}
+      <main className="py-8 md:py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          {notebookLocation ? (
+            <NotebookReveal location={notebookLocation} />
+          ) : (
+            <SecretMessage onSuccess={handlePasswordSuccess} />
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function GameHomePage() {
+  return (
+    <AuthGuard>
+      <GameHomeContent />
+    </AuthGuard>
+  );
 }
