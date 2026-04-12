@@ -43,7 +43,7 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
   };
 
   const companies = [
-    { country: 'H', number: '2.067.339.224' },
+    { country: 'H', number: '0731.383.463' },
     { country: 'N', number: '16043861' },
     { country: 'H', number: '63352842' },
     { country: 'N', number: '0476.604.253' },
@@ -66,8 +66,9 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
             }}
           >
             <p>Ik heb iets ontdekt maar ik voel me niet veilig.</p>
-            <p className="mt-2">De sukkels die achter me aan zitten zijn niet zo slim,</p>
-            <p className="mt-2">vul daarom hieronder het wachtwoord in.</p>
+            <p className="mt-2">Mijn onderzoek spant meerdere enclaves.</p>
+            <p className="mt-2">Ik moet weten dat je slimmer bent dan mijn vijanden.</p>
+            <p className="mt-2">Vul daarom hier het wachtwoord in.</p>
           </div>
         </div>
       </div>
@@ -96,14 +97,17 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
       {/* Company numbers section */}
       <div className="bg-stone-900/30 border border-stone-800 rounded-lg p-6 md:p-8">
         <div className="space-y-4">
+          
+          
           <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300">
-            Het <span className="underline">Product</span> van mijn onderzoek geeft 7 locaties:
+            
+            Het <span className="underline">Product</span> van mijn onderzoek geeft 7 bedrijven:
           </p>
           
           <ul className="space-y-2 font-mono text-stone-400">
             {companies.map((company, index) => (
               <li key={index} className="flex items-center gap-2">
-                <span className="text-amber-600">{company.country}*</span>
+                <span className="text-amber-600">{company.country}_</span>
                 <span>:</span>
                 <span className="text-stone-300">{company.number}</span>
               </li>
@@ -114,29 +118,7 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
             Ze keren elkaar tegen mij.
           </p>
         </div>
-
-        {/* Hint button */}
-        <div className="mt-6 flex justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowHint(!showHint)}
-            className="text-stone-500 hover:text-stone-300 text-xs"
-          >
-            {showHint ? 'Verberg hint' : 'Toon hint'}
-          </Button>
-        </div>
         
-        {showHint && (
-          <div className="mt-4 p-4 bg-stone-800/50 rounded border border-stone-700 text-center">
-            <p className="text-stone-400 text-sm">
-              Dit zijn KVK nummers (Kamer van Koophandel) uit Nederland en België.
-            </p>
-            <p className="text-stone-500 text-xs mt-2">
-              H = Handelsregister (België) | N = Nederland
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
