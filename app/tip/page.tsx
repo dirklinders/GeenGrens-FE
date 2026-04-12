@@ -258,11 +258,19 @@ function TipContent() {
                     Bevestigen
                   </Button>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default function TipPage() {
+  return (
+    <AuthGuard>
+      <TipContent />
     </AuthGuard>
   );
 }

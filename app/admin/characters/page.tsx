@@ -589,9 +589,9 @@ export default function CharactersPage() {
           )
         )}
 
-        {(characters ?? []).length === 0 && (
+        {characters?.length === 0 && !creating && (
           <p className="text-stone-500 text-center py-12">
-            Nog geen verdachten aangemaakt.
+            Nog geen personages aangemaakt. Klik op &quot;Nieuw personage&quot; om te beginnen.
           </p>
         )}
       </div>

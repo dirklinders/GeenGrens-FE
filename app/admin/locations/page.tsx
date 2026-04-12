@@ -252,6 +252,8 @@ export default function LocationsPage() {
             <p className="text-stone-500 text-sm">
               <strong className="text-stone-400">{codes?.length}</strong> code(s) aangemaakt.
               Spelers kunnen elk maximaal één keer per code invoeren.
+              Zodra de eerste code is ingevoerd, krijgen ze toegang tot de ondervragingen.
+              Als alle codes zijn ingevoerd, wordt de anonieme melding ontgrendeld.
             </p>
           </CardContent>
         </Card>

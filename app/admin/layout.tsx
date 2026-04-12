@@ -64,9 +64,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {children}
-      </main>
-    </div>
-  );
-}
+      <main className="max-w-6xl mx-aut

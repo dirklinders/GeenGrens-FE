@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, type React
 import { authApi, type UserInfo } from './api';
 
 // Set NEXT_PUBLIC_REQUIRE_AUTH=false to bypass authentication for testing
-const REQUIRE_AUTH = process.env.NEXT_PUBLIC_REQUIRE_AUTH !== 'false';
+const REQUIRE_AUTH = process.env.REQUIRE_AUTH !== 'false';
 
 const MOCK_USER: UserInfo = {
   id: 'mock-user-id',
