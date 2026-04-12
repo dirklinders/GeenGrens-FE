@@ -265,7 +265,7 @@ export default function ProgressPage() {
         </div>
       ) : teams?.length === 0 ? (
         <p className="text-stone-500 text-center py-12">
-          Geen teams gevonden. Maak eerst teams aan via het Teams-tabblad.
+          Geen teams gevonden. Maak eerst teams aan.
         </p>
       ) : (
         <div className="space-y-4">

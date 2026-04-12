@@ -542,20 +542,12 @@ function NotebookContent() {
           text-align: center;
           outline: none;
           padding: 0;
-          cursor: text;
-          caret-color: transparent;
-          border-radius: 0;
-          -webkit-appearance: none;
-          appearance: none;
         }
 
         .fill-box:focus {
-          border-bottom: 2px solid #8a3020;
-          background: rgba(180, 60, 30, 0.07);
+          border-bottom-color: #3a5a9a;
+          background: rgba(60, 90, 160, 0.06);
         }
-
-        /* Remove text cursor on readonly */
-        .fill-box::selection { background: transparent; }
       `}</style>
     </div>
   );

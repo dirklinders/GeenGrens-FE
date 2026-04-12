@@ -330,16 +330,8 @@ function ChatContent() {
               </Button>
             </form>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
-  );
-}
-
-export default function ChatPage() {
-  return (
-    <AuthGuard>
-      <ChatContent />
     </AuthGuard>
   );
 }

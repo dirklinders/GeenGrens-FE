@@ -150,15 +150,7 @@ function UnlockContent() {
             </ol>
           </CardContent>
         </Card>
-      </main>
-    </div>
-  );
-}
-
-export default function UnlockPage() {
-  return (
-    <AuthGuard>
-      <UnlockContent />
+      </div>
     </AuthGuard>
   );
 }

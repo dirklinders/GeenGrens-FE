@@ -188,12 +188,10 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-stone-950 flex items-center justify-center">
-        <div className="animate-pulse text-stone-400 font-serif text-lg">
-          Laden...
-        </div>
+        <div className="animate-pulse text-stone-400 font-serif text-lg">Laden...</div>
       </div>
     }>
-      <LoginForm />
+      <LoginContent />
     </Suspense>
   );
 }

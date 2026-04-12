@@ -328,7 +328,7 @@ export default function TeamsPage() {
 
         {teams?.length === 0 && (
           <p className="text-stone-500 text-center py-12">
-            Nog geen teams aangemaakt. Klik op &quot;Nieuw team&quot; om te beginnen.
+            Nog geen teams aangemaakt.
           </p>
         )}
       </div>
