@@ -457,4 +457,11 @@ export const adminApi = {
       method: 'PUT',
       body: JSON.stringify({ id: teamId, isPlaytest }),
     }),
+  createUser: (email: string, password: string, name?: string) =>
+    fetchApi<{ id: string; email: string; name: string }>('/api/Admin/CreateUser', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name }),
+    }),
+  deleteUser: (userId: string) =>
+    fetchApi<void>(`/api/Admin/DeleteUser/${userId}`, { method: 'DELETE' }),
 };

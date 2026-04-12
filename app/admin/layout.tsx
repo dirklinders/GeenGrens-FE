@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 
 const NAV_ITEMS = [
   { href: '/admin/teams', label: 'Teams' },
+  { href: '/admin/gebruikers', label: 'Gebruikers' },
   { href: '/admin/characters', label: 'Verdachten' },
   { href: '/admin/locations', label: 'Locatiecodes' },
   { href: '/admin/progress', label: 'Voortgang' },
@@ -63,9 +64,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {children}
-      </main>
-    </div>
-  );
-}
+      <main className="max-w-6xl mx-aut
