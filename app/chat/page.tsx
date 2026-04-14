@@ -212,7 +212,7 @@ function ChatContent() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-72 border-r border-stone-800 flex-shrink-0">
+        <aside className="hidden md:block w-80 border-r border-stone-800 flex-shrink-0">
           <SidebarContent
             characters={charactersList}
             charactersLoading={charactersLoading}
