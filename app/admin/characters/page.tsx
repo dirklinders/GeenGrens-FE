@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import useSWR from 'swr';
-import { characterApi, storyApi, chatFeApi, type CharacterDTO, type StoryDTO, type AdminMessageDTO } from '@/lib/api';
+import { characterApi, chatFeApi, type CharacterDTO, type AdminMessageDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,12 +17,10 @@ type CharacterFormData = Omit<CharacterDTO, 'id'> & { id?: number };
 
 function CharacterForm({
   initial,
-  stories,
   onSave,
   onCancel,
 }: {
   initial?: CharacterDTO;
-  stories: StoryDTO[];
   onSave: (data: CharacterFormData) => Promise<void>;
   onCancel: () => void;
 }) {
@@ -31,7 +29,6 @@ function CharacterForm({
   const [systemPrompt, setSystemPrompt] = useState(initial?.systemPrompt ?? '');
   const [avatarUrl, setAvatarUrl] = useState(initial?.avatarUrl ?? '');
   const [personality, setPersonality] = useState(initial?.personality ?? '');
-  const [storyId, setStoryId] = useState<number>(initial?.storyId ?? 0);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'prompt'>('basic');
 
@@ -46,7 +43,6 @@ function CharacterForm({
         systemPrompt,
         avatarUrl,
         personality: personality || null,
-        storyId,
       });
     } finally {
       setSaving(false);
@@ -79,30 +75,15 @@ function CharacterForm({
 
       {activeTab === 'basic' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label className="text-stone-300 text-sm">Naam *</Label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="bijv. Burgemeester Van Dijk"
-                required
-                className="bg-stone-800 border-stone-700 text-stone-100"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-stone-300 text-sm">Verhaal</Label>
-              <select
-                value={storyId}
-                onChange={(e) => setStoryId(Number(e.target.value))}
-                className="w-full bg-stone-800 border border-stone-700 text-stone-100 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-800"
-              >
-                <option value={0}>Geen verhaal</option>
-                {stories.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </div>
+          <div className="space-y-1">
+            <Label className="text-stone-300 text-sm">Naam *</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="bijv. Burgemeester Van Dijk"
+              required
+              className="bg-stone-800 border-stone-700 text-stone-100"
+            />
           </div>
 
           <div className="space-y-1">
@@ -372,18 +353,15 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
 
 function CharacterCard({
   character,
-  stories,
   onEdit,
   onDelete,
 }: {
   character: CharacterDTO;
-  stories: StoryDTO[];
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const [showPrompt, setShowPrompt] = useState(false);
   const [showTestChat, setShowTestChat] = useState(false);
-  const storyName = stories.find((s) => s.id === character.storyId)?.name;
 
   return (
     <Card className="bg-stone-900 border-stone-800">
@@ -412,11 +390,6 @@ function CharacterCard({
                   <p className="text-stone-500 text-sm mt-0.5">{character.description}</p>
                 )}
                 <div className="flex flex-wrap gap-2 mt-1.5">
-                  {storyName && (
-                    <span className="bg-stone-800 text-stone-400 text-xs px-2 py-0.5 rounded">
-                      {storyName}
-                    </span>
-                  )}
                   {character.personality && (
                     <span className="bg-stone-800 text-stone-400 text-xs px-2 py-0.5 rounded italic">
                       {character.personality}
@@ -481,13 +454,10 @@ function CharacterCard({
 
 export default function CharactersPage() {
   const { data: characters, mutate } = useSWR('admin-characters', characterApi.getAll, { revalidateOnFocus: false });
-  const { data: stories } = useSWR('admin-stories', storyApi.getAll, { revalidateOnFocus: false });
 
   const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState('');
-
-  const storyList = stories ?? [];
 
   const handleCreate = async (data: CharacterFormData) => {
     try {
@@ -551,7 +521,6 @@ export default function CharactersPage() {
           </CardHeader>
           <CardContent>
             <CharacterForm
-              stories={storyList}
               onSave={handleCreate}
               onCancel={() => setCreating(false)}
             />
@@ -572,7 +541,6 @@ export default function CharactersPage() {
               <CardContent>
                 <CharacterForm
                   initial={character}
-                  stories={storyList}
                   onSave={handleUpdate}
                   onCancel={() => setEditingId(null)}
                 />
@@ -582,7 +550,6 @@ export default function CharactersPage() {
             <CharacterCard
               key={character.id}
               character={character}
-              stories={storyList}
               onEdit={() => { setEditingId(character.id); setCreating(false); }}
               onDelete={() => handleDelete(character.id)}
             />

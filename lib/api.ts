@@ -58,7 +58,6 @@ export interface CharacterDTO {
   systemPrompt: string | null;
   avatarUrl: string | null;
   personality: string | null;
-  storyId: number;
 }
 
 export interface ChatDTO {
@@ -71,11 +70,6 @@ export interface AdminMessageDTO {
   content: string;
 }
 
-export interface StoryDTO {
-  id: number;
-  name: string | null;
-  description: string | null;
-}
 
 export interface TeamDTO {
   id: number;
@@ -364,27 +358,6 @@ export const chatFeApi = {
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
     return consumeSseStream(response, onChunk, signal);
   },
-};
-
-// ────────────────────────────────────────────────────────────
-// Stories (admin CRUD)
-// ────────────────────────────────────────────────────────────
-
-export const storyApi = {
-  getAll: () => fetchApi<StoryDTO[]>('/api/Story'),
-  getById: (id: number) => fetchApi<StoryDTO>(`/api/Story/${id}`),
-  create: (data: Omit<StoryDTO, 'id'>) =>
-    fetchApi<StoryDTO>('/api/Story', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  update: (data: StoryDTO) =>
-    fetchApi<StoryDTO>('/api/Story', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
-  delete: (id: number) =>
-    fetchApi<void>(`/api/Story/${id}`, { method: 'DELETE' }),
 };
 
 // ────────────────────────────────────────────────────────────

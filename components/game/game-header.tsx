@@ -33,6 +33,7 @@ export function GameHeader({
   const canAccessChat = gameStatus?.canAccessChat ?? false;
   const canSubmitTip = gameStatus?.canSubmitTip ?? false;
   const isPlaytest = gameStatus?.isPlaytest ?? false;
+  const isUnlocked = gameStatus?.isUnlocked ?? false;
 
   return (
     <header className="bg-stone-900 border-b border-stone-800 sticky top-0 z-50">
@@ -64,7 +65,7 @@ export function GameHeader({
         </div>
 
         <nav className="flex items-center gap-4 md:gap-6">
-          {isPlaytest && (
+          {isPlaytest && isUnlocked && (
             <Link
               href="/notebook"
               className="text-amber-600 hover:text-amber-400 transition-colors text-sm"
