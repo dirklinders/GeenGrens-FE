@@ -12,13 +12,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-const SUSPECTS = [
-  { id: 'burgemeester', name: 'Burgemeester Van Dijk', description: 'Betrokken bij de grondtransactie 20 jaar geleden' },
-  { id: 'hoteleigenaar', name: 'Hans de Vries (Hoteleigenaar)', description: 'Wilde de grond kopen voor een hotel' },
-  { id: 'cafe-eigenaar', name: 'Piet Jansen (Cafe-eigenaar)', description: 'Kende de vorige grondeigenaar, was afgekocht' },
-  { id: 'barmeid', name: 'Lisa Bakker (Barmeid)', description: 'Werkt in het cafe, lijkt onschuldig' },
-];
-
 function TipContent() {
   const router = useRouter();
   const [selectedSuspect, setSelectedSuspect] = useState('');
@@ -32,6 +25,13 @@ function TipContent() {
   const { data: gameStatus, isLoading: statusLoading } = useSWR(
     'game-status-tip',
     () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
+
+  // Unlocked characters — these are the selectable suspects
+  const { data: characters, isLoading: charactersLoading } = useSWR(
+    'unlocked-characters-tip',
+    () => gameApi.getUnlockedCharacters(),
     { revalidateOnFocus: false }
   );
 
@@ -165,34 +165,53 @@ function TipContent() {
               {/* Suspect selection */}
               <div className="space-y-3">
                 <Label className="text-stone-200 text-base">Wie is de moordenaar?</Label>
-                <RadioGroup
-                  value={selectedSuspect}
-                  onValueChange={setSelectedSuspect}
-                  className="space-y-2"
-                >
-                  {SUSPECTS.map((suspect) => (
-                    <div
-                      key={suspect.id}
-                      className="flex items-start space-x-3 bg-stone-800 p-4 rounded cursor-pointer hover:bg-stone-750 transition-colors"
-                      onClick={() => setSelectedSuspect(suspect.id)}
-                    >
-                      <RadioGroupItem
-                        value={suspect.id}
-                        id={suspect.id}
-                        className="mt-1 border-stone-600 text-red-600"
-                      />
-                      <div>
-                        <Label
-                          htmlFor={suspect.id}
-                          className="text-stone-100 font-medium cursor-pointer"
+                {charactersLoading ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="animate-pulse bg-stone-800 h-16 rounded" />
+                    ))}
+                  </div>
+                ) : (
+                  <RadioGroup
+                    value={selectedSuspect}
+                    onValueChange={setSelectedSuspect}
+                    className="space-y-2"
+                  >
+                    {(characters ?? []).map((character) => {
+                      const key = String(character.id);
+                      return (
+                        <div
+                          key={key}
+                          className="flex items-start space-x-3 bg-stone-800 p-4 rounded cursor-pointer transition-colors hover:bg-stone-750"
+                          onClick={() => setSelectedSuspect(key)}
                         >
-                          {suspect.name}
-                        </Label>
-                        <p className="text-stone-500 text-sm">{suspect.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </RadioGroup>
+                          <RadioGroupItem
+                            value={key}
+                            id={key}
+                            className="mt-1 border-stone-600 text-red-600"
+                          />
+                          <div className="flex items-center gap-3">
+                            {character.avatarUrl && (
+                              <img
+                                src={character.avatarUrl}
+                                alt={character.name ?? ''}
+                                className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                              />
+                            )}
+                            <div>
+                              <Label htmlFor={key} className="text-stone-100 font-medium cursor-pointer">
+                                {character.name}
+                              </Label>
+                              {character.description && (
+                                <p className="text-stone-500 text-sm">{character.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </RadioGroup>
+                )}
               </div>
 
               {/* Motive */}
@@ -236,7 +255,7 @@ function TipContent() {
                 <p className="text-stone-400">
                   Je staat op het punt om{' '}
                   <strong className="text-stone-200">
-                    {SUSPECTS.find((s) => s.id === selectedSuspect)?.name}
+                    {characters?.find((c) => String(c.id) === selectedSuspect)?.name}
                   </strong>{' '}
                   te beschuldigen van moord.
                 </p>

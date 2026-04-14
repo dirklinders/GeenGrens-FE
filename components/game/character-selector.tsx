@@ -19,7 +19,7 @@ export function CharacterSelector({ characters, selectedId, onSelect }: Characte
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 pr-1">
       <h3 className="text-xs uppercase tracking-wider text-stone-500 px-2 mb-3">
         Verdachten
       </h3>
