@@ -37,20 +37,22 @@ function SidebarContent({
         <p className="text-xs text-stone-500 mt-1">Selecteer iemand om te ondervragen</p>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        {charactersLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse bg-stone-800 h-16 rounded-lg" />
-            ))}
-          </div>
-        ) : (
-          <CharacterSelector
-            characters={characters}
-            selectedId={selectedCharacterId}
-            onSelect={onSelectCharacter}
-          />
-        )}
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          {charactersLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="animate-pulse bg-stone-800 h-16 rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <CharacterSelector
+              characters={characters}
+              selectedId={selectedCharacterId}
+              onSelect={onSelectCharacter}
+            />
+          )}
+        </div>
       </ScrollArea>
     </div>
   );
