@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { ChatMessage } from '@/components/game/chat-message';
@@ -58,6 +58,7 @@ function SidebarContent({
 
 function ChatContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,6 +97,16 @@ function ChatContent() {
   );
 
   const charactersList = characters || [];
+
+  // Auto-select character from NFC scan query param (?character=ID)
+  useEffect(() => {
+    const paramId = searchParams.get('character');
+    if (!paramId || charactersList.length === 0) return;
+    const id = parseInt(paramId, 10);
+    if (!isNaN(id) && charactersList.some(c => c.id === id)) {
+      setSelectedCharacterId(id);
+    }
+  }, [searchParams, charactersList]);
   const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
 
   // Sync chat history to local state
@@ -339,7 +350,13 @@ function ChatContent() {
 export default function ChatPage() {
   return (
     <AuthGuard>
-      <ChatContent />
+      <Suspense fallback={
+        <div className="min-h-screen bg-stone-950 flex items-center justify-center">
+          <div className="animate-pulse text-stone-400 font-serif text-lg">Laden...</div>
+        </div>
+      }>
+        <ChatContent />
+      </Suspense>
     </AuthGuard>
   );
 }

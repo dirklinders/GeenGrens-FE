@@ -1,12 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import useSWR from 'swr';
 import { locationCodeApi, characterApi, type LocationCodeDTO, type CharacterDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+
+const NFC_BASE_URL = 'https://geengrens.nl/api/Unlock';
+
+// ────────────────────────────────────────────────────────────
+// NFC URL copy button
+// ────────────────────────────────────────────────────────────
+
+function NfcUrlRow({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `${NFC_BASE_URL}/${code}`;
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [url]);
+
+  return (
+    <div className="mt-2 flex items-center gap-2 bg-stone-950 rounded px-3 py-1.5 border border-stone-800">
+      <span className="text-stone-500 text-xs shrink-0">NFC →</span>
+      <span className="text-stone-400 text-xs font-mono truncate flex-1">{url}</span>
+      <button
+        onClick={handleCopy}
+        className="text-xs shrink-0 text-stone-500 hover:text-stone-200 transition-colors"
+        title="Kopieer NFC URL"
+      >
+        {copied ? '✓ Gekopieerd' : 'Kopieer'}
+      </button>
+    </div>
+  );
+}
 
 // ────────────────────────────────────────────────────────────
 // Location code form
@@ -203,20 +235,23 @@ export default function LocationsPage() {
                 />
               ) : (
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    {/* Code badge */}
-                    <div className="bg-stone-800 px-3 py-1.5 rounded font-mono text-sm text-stone-200 tracking-widest shrink-0">
-                      {lc.code}
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className="flex items-start gap-4">
+                      {/* Code badge */}
+                      <div className="bg-stone-800 px-3 py-1.5 rounded font-mono text-sm text-stone-200 tracking-widest shrink-0">
+                        {lc.code}
+                      </div>
+                      <div>
+                        <p className="text-stone-100 font-medium">{lc.locationName}</p>
+                        <p className="text-stone-500 text-sm mt-0.5">
+                          Ontgrendelt: <span className="text-stone-300">{characterName(lc.characterId)}</span>
+                        </p>
+                        {lc.unlockMessage && (
+                          <p className="text-stone-600 text-xs mt-1 italic">&ldquo;{lc.unlockMessage}&rdquo;</p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-stone-100 font-medium">{lc.locationName}</p>
-                      <p className="text-stone-500 text-sm mt-0.5">
-                        Ontgrendelt: <span className="text-stone-300">{characterName(lc.characterId)}</span>
-                      </p>
-                      {lc.unlockMessage && (
-                        <p className="text-stone-600 text-xs mt-1 italic">&ldquo;{lc.unlockMessage}&rdquo;</p>
-                      )}
-                    </div>
+                    <NfcUrlRow code={lc.code} />
                   </div>
                   <div className="flex gap-3 shrink-0">
                     <button
