@@ -23,6 +23,11 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: 'GeenGrens - Murder Mystery',
   description: 'Ontdek de waarheid achter de mysterieuze dood van Viktor Vermeer',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    viewportFit: 'cover',
+  },
 }
 
 export default function RootLayout({

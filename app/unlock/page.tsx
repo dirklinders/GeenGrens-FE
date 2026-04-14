@@ -51,10 +51,10 @@ function UnlockContent() {
     <div className="min-h-screen bg-stone-950">
       <GameHeader />
 
-      <main className="py-12 px-4 max-w-2xl mx-auto">
+      <main className="py-6 sm:py-12 px-4 max-w-2xl mx-auto">
         <Card className="bg-stone-900 border-stone-800">
           <CardHeader>
-            <CardTitle className="font-serif text-2xl text-stone-100">
+            <CardTitle className="font-serif text-xl sm:text-2xl text-stone-100">
               Locatiecode Invoeren
             </CardTitle>
             <CardDescription className="text-stone-400">
@@ -63,19 +63,19 @@ function UnlockContent() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <Input
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="Voer code in..."
                   disabled={isSubmitting}
-                  className="bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 uppercase tracking-widest font-mono"
+                  className="bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 uppercase tracking-widest font-mono text-base flex-1"
                 />
                 <Button
                   type="submit"
                   disabled={isSubmitting || !code.trim()}
-                  className="bg-red-800 hover:bg-red-700 text-stone-100"
+                  className="bg-red-800 hover:bg-red-700 text-stone-100 flex-shrink-0"
                 >
                   {isSubmitting ? 'Bezig...' : 'Ontgrendel'}
                 </Button>
@@ -121,15 +121,15 @@ function UnlockContent() {
                 {unlockedCodes.map((unlock) => (
                   <li
                     key={unlock.code}
-                    className="flex items-center justify-between bg-stone-800 px-4 py-3 rounded"
+                    className="flex items-center justify-between gap-3 bg-stone-800 px-4 py-3 rounded"
                   >
-                    <div>
-                      <span className="text-stone-100 block">
+                    <div className="min-w-0">
+                      <span className="text-stone-100 block truncate">
                         {unlock.characterName ?? unlock.locationName}
                       </span>
-                      <span className="text-stone-500 text-xs">{unlock.locationName}</span>
+                      <span className="text-stone-500 text-xs truncate block">{unlock.locationName}</span>
                     </div>
-                    <span className="text-stone-500 text-xs font-mono">{unlock.code}</span>
+                    <span className="text-stone-500 text-xs font-mono flex-shrink-0">{unlock.code}</span>
                   </li>
                 ))}
               </ul>

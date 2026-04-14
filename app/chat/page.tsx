@@ -224,10 +224,10 @@ function ChatContent() {
         {/* Main Chat Area */}
         <main className="flex-1 flex flex-col min-w-0">
           {/* Selected character info bar */}
-          <div className="bg-stone-900/50 border-b border-stone-800 p-4 flex items-center gap-4">
+          <div className="bg-stone-900/50 border-b border-stone-800 px-3 sm:px-4 py-3 flex items-center gap-3 min-w-0">
             {selectedCharacter ? (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-900 flex items-center justify-center text-red-100 font-medium">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-900 flex items-center justify-center text-red-100 font-medium flex-shrink-0">
                   {selectedCharacter.avatarUrl ? (
                     <img
                       src={selectedCharacter.avatarUrl}
@@ -238,17 +238,17 @@ function ChatContent() {
                     selectedCharacter.name?.charAt(0) || '?'
                   )}
                 </div>
-                <div>
-                  <h1 className="text-stone-100 font-medium">
+                <div className="min-w-0">
+                  <h1 className="text-stone-100 font-medium truncate">
                     {selectedCharacter.name}
                   </h1>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-stone-500 truncate">
                     {selectedCharacter.description || 'Verdachte'}
                   </p>
                 </div>
               </div>
             ) : (
-              <h1 className="text-stone-400">Selecteer een verdachte</h1>
+              <h1 className="text-stone-400 text-sm sm:text-base">Selecteer een verdachte</h1>
             )}
           </div>
 
@@ -312,23 +312,23 @@ function ChatContent() {
           </ScrollArea>
 
           {/* Input Area */}
-          <div className="border-t border-stone-800 p-4 bg-stone-900">
-            <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex gap-3">
+          <div className="border-t border-stone-800 p-3 sm:p-4 bg-stone-900 safe-area-bottom">
+            <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex gap-2 sm:gap-3">
               <Input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={
                   selectedCharacterId
-                    ? `Stel een vraag aan ${selectedCharacter?.name || 'de verdachte'}...`
+                    ? `Vraag aan ${selectedCharacter?.name || 'verdachte'}...`
                     : 'Selecteer eerst een verdachte...'
                 }
                 disabled={!selectedCharacterId || isSubmitting}
-                className="flex-1 bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 focus:border-red-800 focus:ring-red-800"
+                className="flex-1 bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 focus:border-red-800 focus:ring-red-800 text-base"
               />
               <Button
                 type="submit"
                 disabled={!selectedCharacterId || !message.trim() || isSubmitting}
-                className="bg-red-800 hover:bg-red-700 text-stone-100 px-6"
+                className="bg-red-800 hover:bg-red-700 text-stone-100 px-3 sm:px-6 flex-shrink-0"
               >
                 {isSubmitting ? (
                   <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">

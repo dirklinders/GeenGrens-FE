@@ -137,7 +137,7 @@ function TipContent() {
     <div className="min-h-screen bg-stone-950">
       <GameHeader />
 
-      <main className="py-12 px-4 max-w-2xl mx-auto">
+      <main className="py-6 sm:py-12 px-4 max-w-2xl mx-auto">
         {/* Warning */}
         <div className="bg-red-950 border border-red-800 rounded px-4 py-3 mb-6">
           <p className="text-red-400 text-sm font-medium">
