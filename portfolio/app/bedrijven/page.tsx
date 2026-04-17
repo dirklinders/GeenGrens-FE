@@ -59,6 +59,34 @@ export default function BedrijvenPage() {
           als er ooit een conflict ontstaat.
         </p>
 
+        <h3 className="font-serif text-lg font-semibold text-foreground mt-6 mb-2">
+          Bronvermelding
+        </h3>
+        <ul className="list-disc pl-6">
+          <li>
+            KvK (Kamer van Koophandel):{" "}
+            <a
+              href="https://kvk.nl"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              https://kvk.nl
+            </a>
+          </li>
+          <li>
+            KBO (Kruispuntbank van Ondernemingen):{" "}
+            <a
+              href="https://kbopub.economie.fgov.be"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              https://kbopub.economie.fgov.be
+            </a>
+          </li>
+        </ul>
+
       </BlogArticle>
     </PageLayout>
   )

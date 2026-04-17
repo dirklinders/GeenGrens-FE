@@ -101,7 +101,8 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
           
           <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300">
             
-            Het <span className="underline">Product</span> van mijn onderzoek geeft 7 bedrijven:
+            Het <span className="underline">Product</span> van mijn onderzoek geeft 7 bedrijven. <br/>
+            Hun locatie is belangrijker dan hun naam.
           </p>
           
           <ul className="space-y-2 font-mono text-stone-400">
@@ -115,6 +116,7 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
           </ul>
           
           <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300 mt-4">
+            De letters zeggen niets zonder hun nummer. <br/>
             Ze keren elkaar tegen mij.
           </p>
         </div>
