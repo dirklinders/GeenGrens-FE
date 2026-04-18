@@ -104,8 +104,8 @@ export function GameHeader({
             </nav>
           )}
 
-          {/* Mobile nav hamburger (always visible on mobile when there are nav items) */}
-          {navItems.length > 0 && (
+          {/* Mobile nav hamburger — always visible when logged in */}
+          {user && (
             <Sheet open={navOpen} onOpenChange={setNavOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -122,8 +122,13 @@ export function GameHeader({
               <SheetContent side="right" className="w-72 bg-stone-900 border-stone-800 flex flex-col">
                 <SheetTitle className="font-serif text-stone-100 text-xl mb-6">Menu</SheetTitle>
 
-                {/* Nav links */}
+                {/* Nav links (may be empty before team assignment) */}
                 <nav className="flex flex-col gap-1 flex-1">
+                  {navItems.length === 0 && (
+                    <p className="text-stone-600 text-sm px-3">
+                      Nog geen locaties ontgrendeld.
+                    </p>
+                  )}
                   {navItems.map(item => (
                     <Link
                       key={item.href}
@@ -139,8 +144,10 @@ export function GameHeader({
                 {/* User info + logout at bottom */}
                 <div className="border-t border-stone-800 pt-4 space-y-3">
                   <div className="px-3 space-y-1">
-                    {user?.teamName && (
+                    {user?.teamName ? (
                       <p className="text-amber-600 font-medium text-sm truncate">{user.teamName}</p>
+                    ) : (
+                      <p className="text-stone-500 text-xs">Geen team toegewezen</p>
                     )}
                     <p className="text-stone-500 text-xs truncate">{user?.name || user?.email}</p>
                   </div>
