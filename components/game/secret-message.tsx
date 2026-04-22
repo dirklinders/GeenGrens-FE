@@ -79,9 +79,10 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
           value={password}
           onChange={setPassword}
           onSubmit={handleSubmit}
-          maxLength={4}
+          maxLength={8}
           disabled={isLoading}
           shake={shake}
+          backgroundLetters={['H', 'N', 'H', 'H', 'N', 'H', 'N', 'H']}
         />
         
         {error && (

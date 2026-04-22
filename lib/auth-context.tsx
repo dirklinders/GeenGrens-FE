@@ -64,8 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await authApi.logout();
+    } catch {
+      // ignore errors — we still want to clear local state
     } finally {
       setUser(null);
+      // Hard redirect clears all SWR caches and React state,
+      // so the cookie check on /login is always fresh.
+      window.location.href = '/login';
     }
   };
 

@@ -10,15 +10,17 @@ interface NumpadProps {
   maxLength?: number;
   disabled?: boolean;
   shake?: boolean;
+  backgroundLetters?: string[];
 }
 
-export function Numpad({ 
-  value, 
-  onChange, 
-  onSubmit, 
-  maxLength = 6, 
+export function Numpad({
+  value,
+  onChange,
+  onSubmit,
+  maxLength = 6,
   disabled = false,
-  shake = false 
+  shake = false,
+  backgroundLetters,
 }: NumpadProps) {
   const handleDigit = (digit: string) => {
     if (value.length < maxLength && !disabled) {
@@ -48,23 +50,32 @@ export function Numpad({
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Display */}
-      <div 
+      <div
         className={cn(
-          "w-full max-w-[240px] h-14 bg-stone-800 border-2 border-stone-700 rounded-lg flex items-center justify-center font-mono text-2xl tracking-[0.5em] text-stone-100 transition-all",
+          "w-full max-w-xs h-14 bg-stone-800 border-2 border-stone-700 rounded-lg flex items-center justify-center font-mono text-xl px-3 gap-1 transition-all",
           shake && "animate-shake border-red-500"
         )}
       >
-        {value.padEnd(maxLength, '•').split('').map((char, i) => (
-          <span 
-            key={i} 
-            className={cn(
-              "w-8 text-center",
-              char === '•' ? "text-stone-600" : "text-stone-100"
-            )}
-          >
-            {char === '•' ? '•' : '*'}
-          </span>
-        ))}
+        {Array.from({ length: maxLength }, (_, i) => {
+          const isFilled = i < value.length;
+          const bgLetter = backgroundLetters?.[i];
+          return (
+            <span
+              key={i}
+              className="relative flex-1 flex items-center justify-center text-center"
+            >
+              {isFilled ? (
+                <span className="text-stone-100 text-xl">*</span>
+              ) : bgLetter ? (
+                <span className="text-stone-500 text-xs font-sans select-none opacity-50 tracking-normal">
+                  {bgLetter}
+                </span>
+              ) : (
+                <span className="text-stone-600">•</span>
+              )}
+            </span>
+          );
+        })}
       </div>
 
       {/* Numpad grid */}
