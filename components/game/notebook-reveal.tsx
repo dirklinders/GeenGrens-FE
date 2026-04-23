@@ -69,7 +69,7 @@ export function NotebookReveal({ location, isPlaytest = false }: NotebookRevealP
           </div>
           <p className="text-stone-400 text-sm text-center">
             Je moet de NFC tags met dit logo scannen om met verdachten te kunnen praten.
-            Let op dat je niet meer met verdachten kan praten als je de nieuwe code scant.
+            Let op dat je niet meer met verdachten kan praten als je een nieuwe code scant.
           </p>
         </div>
       </div>
