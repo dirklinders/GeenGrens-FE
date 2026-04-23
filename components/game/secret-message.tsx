@@ -100,9 +100,8 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
         <div className="space-y-4">
           
           
-          <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300">
-            
-            Het <span className="underline">Product</span> van mijn onderzoek geeft 7 bedrijven. <br/>
+          <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300">            
+            Uit mijn onderzoek kwamen 7 bedrijven naar voren. <br/>
             Hun locatie is belangrijker dan hun naam.
           </p>
           
@@ -111,14 +110,24 @@ export function SecretMessage({ onSuccess }: SecretMessageProps) {
               <li key={index} className="flex items-center gap-2">
                 <span className="text-amber-600">{company.country}_</span>
                 <span>:</span>
-                <span className="text-stone-300">{company.number}</span>
+                {index === 0 ? (
+                  <a
+                    href="https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?nummer=0731.383.463"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-stone-300 underline underline-offset-2 decoration-stone-600 hover:text-amber-300 hover:decoration-amber-600 transition-colors"
+                  >
+                    {company.number}
+                  </a>
+                ) : (
+                  <span className="text-stone-300">{company.number}</span>
+                )}
               </li>
             ))}
           </ul>
           
           <p className="font-[family-name:var(--font-handwritten)] text-lg text-stone-300 mt-4">
             De letters zeggen niets zonder hun nummer. <br/>
-            Ze keren elkaar tegen mij.
           </p>
         </div>
         

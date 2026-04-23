@@ -21,11 +21,11 @@ type Line =
   | { type: 'rule' };
 
 // ────────────────────────────────────────────────────────────
-// Page 1
+// Page 1  (bar name is dynamic)
 // ────────────────────────────────────────────────────────────
 
-const PAGE_1: Line[] = [
-  { type: 'text',  content: 'Avond in Café [X] — jackpot. Barman veel te los' },
+function makePage1(barName: string): Line[] { return [
+  { type: 'text',  content: `Avond in ${barName} — jackpot. Barman veel te los` },
   { type: 'text',  content: 'na sluitingstijd, dacht waarschijnlijk dat ik al' },
   { type: 'text',  content: 'te ver heen was. Letterlijk (of zo goed als):' },
   { type: 'quote', content: '"Grond wisselt hier wel vaker van eigenaar.\nNiet altijd eerlijk. Wie het weet,\nwordt er beter van."' },
@@ -36,7 +36,7 @@ const PAGE_1: Line[] = [
   { type: 'spacer' },
   { type: 'text',  content: 'Morgenavond terug naar de bar. Die barman' },
   { type: 'text',  content: 'weet meer. Moet hem aan de praat krijgen.' },
-];
+]; }
 
 // ────────────────────────────────────────────────────────────
 // Page 2
@@ -98,7 +98,6 @@ const PAGE_3: Line[] = [
   { type: 'text',  content: 'Evub arbdkgjkub, frsr\'i mlkub vlb wls dlla nuoutas.' },
 ];
 
-const PAGES = [PAGE_1, PAGE_2, PAGE_3];
 const PAGE_LABELS = ['Pagina 1', 'Pagina 2', 'Pagina 3'];
 
 // ────────────────────────────────────────────────────────────
@@ -262,6 +261,9 @@ function NotebookContent() {
       </div>
     );
   }
+
+  const barName = gameStatus.barName || 'de bar';
+  const PAGES = [makePage1(barName), PAGE_2, PAGE_3];
 
   return (
     <div className="h-screen bg-stone-950 flex flex-col">

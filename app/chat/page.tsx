@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { ChatMessage } from '@/components/game/chat-message';
 import { CharacterSelector } from '@/components/game/character-selector';
 import { GameHeader } from '@/components/game/game-header';
-import { gameApi, chatFeApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
+import { gameApi, chatFeApi, unlockApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,11 +23,13 @@ function SidebarContent({
   characters,
   charactersLoading,
   selectedCharacterId,
+  lockedCharacterIds,
   onSelectCharacter,
 }: {
   characters: CharacterDTO[];
   charactersLoading: boolean;
   selectedCharacterId: number | null;
+  lockedCharacterIds: Set<number>;
   onSelectCharacter: (id: number) => void;
 }) {
   return (
@@ -49,6 +51,7 @@ function SidebarContent({
             <CharacterSelector
               characters={characters}
               selectedId={selectedCharacterId}
+              lockedIds={lockedCharacterIds}
               onSelect={onSelectCharacter}
             />
           )}
@@ -67,6 +70,7 @@ function ChatContent() {
   const [localMessages, setLocalMessages] = useState<LocalMessage[]>([]);
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -91,6 +95,36 @@ function ChatContent() {
     { revalidateOnFocus: false }
   );
 
+  // Fetch unlock order to determine which chats are locked
+  const { data: unlockedCodes } = useSWR(
+    'unlocked-codes-chat',
+    () => unlockApi.getUnlocked(),
+    { revalidateOnFocus: false }
+  );
+
+  // The most recently scanned character is the only one still active
+  const latestUnlockedCharacterId = useMemo(() => {
+    if (!unlockedCodes || unlockedCodes.length === 0) return null;
+    const sorted = [...unlockedCodes].sort(
+      (a, b) => new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime()
+    );
+    return sorted[0].characterId;
+  }, [unlockedCodes]);
+
+  // All characters except the latest are locked (read-only)
+  const lockedCharacterIds = useMemo(() => {
+    if (!unlockedCodes || unlockedCodes.length <= 1) return new Set<number>();
+    return new Set(
+      unlockedCodes
+        .filter(uc => uc.characterId !== latestUnlockedCharacterId)
+        .map(uc => uc.characterId)
+    );
+  }, [unlockedCodes, latestUnlockedCharacterId]);
+
+  const isChatLocked =
+    selectedCharacterId !== null &&
+    lockedCharacterIds.has(selectedCharacterId);
+
   // Fetch chat history for selected character
   const { data: chatHistory, mutate: mutateChatHistory } = useSWR<ChatDTO[]>(
     selectedCharacterId ? `chats-${selectedCharacterId}` : null,
@@ -109,6 +143,7 @@ function ChatContent() {
       setSelectedCharacterId(id);
     }
   }, [searchParams, charactersList]);
+
   const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
 
   // Sync chat history to local state
@@ -124,7 +159,10 @@ function ChatContent() {
 
   // Scroll to bottom when messages change or streaming progresses
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [localMessages, streamingText]);
 
   // Handle character selection
@@ -141,7 +179,7 @@ function ChatContent() {
   // Handle sending a message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || !selectedCharacterId || isSubmitting) return;
+    if (!message.trim() || !selectedCharacterId || isSubmitting || isChatLocked) return;
 
     const userInput = message.trim();
     setMessage('');
@@ -197,12 +235,13 @@ function ChatContent() {
       characters={charactersList}
       charactersLoading={charactersLoading}
       selectedCharacterId={selectedCharacterId}
+      lockedCharacterIds={lockedCharacterIds}
       onSelectCharacter={handleSelectCharacter}
     />
   );
 
   return (
-    <div className="h-screen bg-stone-950 flex flex-col">
+    <div className="flex flex-col bg-stone-950" style={{ height: '100dvh' }}>
       <GameHeader
         showMobileMenu
         mobileMenuContent={mobileMenuContent}
@@ -210,21 +249,22 @@ function ChatContent() {
         onMobileMenuChange={setSidebarOpen}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Desktop Sidebar */}
         <aside className="hidden md:block w-80 border-r border-stone-800 flex-shrink-0">
           <SidebarContent
             characters={charactersList}
             charactersLoading={charactersLoading}
             selectedCharacterId={selectedCharacterId}
+            lockedCharacterIds={lockedCharacterIds}
             onSelectCharacter={handleSelectCharacter}
           />
         </aside>
 
         {/* Main Chat Area */}
-        <main className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0 min-h-0">
           {/* Selected character info bar */}
-          <div className="bg-stone-900/50 border-b border-stone-800 px-3 sm:px-4 py-3 flex items-center gap-3 min-w-0">
+          <div className="bg-stone-900/50 border-b border-stone-800 px-3 sm:px-4 py-3 flex items-center gap-3 min-w-0 flex-shrink-0">
             {selectedCharacter ? (
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-900 flex items-center justify-center text-red-100 font-medium flex-shrink-0">
@@ -243,7 +283,9 @@ function ChatContent() {
                     {selectedCharacter.name}
                   </h1>
                   <p className="text-xs text-stone-500 truncate">
-                    {selectedCharacter.description || 'Verdachte'}
+                    {isChatLocked
+                      ? '🔒 Verhoor afgesloten'
+                      : selectedCharacter.description || 'Verdachte'}
                   </p>
                 </div>
               </div>
@@ -252,8 +294,11 @@ function ChatContent() {
             )}
           </div>
 
-          {/* Messages Area */}
-          <ScrollArea className="flex-1 p-4">
+          {/* Messages Area — plain div so scroll-to-bottom works reliably */}
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto overscroll-contain p-4 min-h-0"
+          >
             {!selectedCharacterId ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center space-y-4 max-w-md mx-auto p-8">
@@ -283,7 +328,7 @@ function ChatContent() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4 max-w-3xl mx-auto">
+              <div className="space-y-4 max-w-3xl mx-auto pb-2">
                 {localMessages.map((msg) => (
                   <ChatMessage
                     key={msg.id}
@@ -309,39 +354,49 @@ function ChatContent() {
                 <div ref={messagesEndRef} />
               </div>
             )}
-          </ScrollArea>
+          </div>
 
-          {/* Input Area */}
-          <div className="border-t border-stone-800 p-3 sm:p-4 bg-stone-900 safe-area-bottom">
-            <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex gap-2 sm:gap-3">
-              <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={
-                  selectedCharacterId
-                    ? `Vraag aan ${selectedCharacter?.name || 'verdachte'}...`
-                    : 'Selecteer eerst een verdachte...'
-                }
-                disabled={!selectedCharacterId || isSubmitting}
-                className="flex-1 bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 focus:border-red-800 focus:ring-red-800 text-base"
-              />
-              <Button
-                type="submit"
-                disabled={!selectedCharacterId || !message.trim() || isSubmitting}
-                className="bg-red-800 hover:bg-red-700 text-stone-100 px-3 sm:px-6 flex-shrink-0"
-              >
-                {isSubmitting ? (
-                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                )}
-              </Button>
-            </form>
+          {/* Input Area — always pinned at bottom */}
+          <div className="border-t border-stone-800 bg-stone-900 flex-shrink-0">
+            {isChatLocked ? (
+              <div className="px-3 sm:px-4 py-3 max-w-3xl mx-auto">
+                <p className="text-stone-500 text-sm text-center">
+                  🔒 Dit verhoor is afgesloten — je hebt een nieuwe locatie ontdekt. Je kunt het gesprek nog wel teruglezen.
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 sm:p-4">
+                <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex gap-2 sm:gap-3">
+                  <Input
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder={
+                      selectedCharacterId
+                        ? `Vraag aan ${selectedCharacter?.name || 'verdachte'}...`
+                        : 'Selecteer eerst een verdachte...'
+                    }
+                    disabled={!selectedCharacterId || isSubmitting}
+                    className="flex-1 bg-stone-800 border-stone-700 text-stone-100 placeholder:text-stone-500 focus:border-red-800 focus:ring-red-800 text-base"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!selectedCharacterId || !message.trim() || isSubmitting}
+                    className="bg-red-800 hover:bg-red-700 text-stone-100 px-3 sm:px-6 flex-shrink-0"
+                  >
+                    {isSubmitting ? (
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                    )}
+                  </Button>
+                </form>
+              </div>
+            )}
           </div>
         </main>
       </div>

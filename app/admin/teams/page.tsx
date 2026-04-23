@@ -24,13 +24,14 @@ function TeamForm({
 }) {
   const [name, setName] = useState(initial?.name ?? '');
   const [notebookLocation, setNotebookLocation] = useState(initial?.notebookLocation ?? '');
+  const [barName, setBarName] = useState(initial?.barName ?? '');
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave({ id: initial?.id, name, notebookLocation: notebookLocation || null });
+      await onSave({ id: initial?.id, name, notebookLocation: notebookLocation || null, barName: barName || null });
     } finally {
       setSaving(false);
     }
@@ -57,6 +58,18 @@ function TeamForm({
           value={notebookLocation}
           onChange={(e) => setNotebookLocation(e.target.value)}
           placeholder="bijv. Achter de bar"
+          className="bg-stone-800 border-stone-700 text-stone-100"
+        />
+      </div>
+      <div className="space-y-1">
+        <Label className="text-stone-300 text-sm">
+          Naam van de bar{' '}
+          <span className="text-stone-500 font-normal">(vervangt {'{BarNaam}'} in systeem-prompts en notitieboek)</span>
+        </Label>
+        <Input
+          value={barName}
+          onChange={(e) => setBarName(e.target.value)}
+          placeholder="bijv. Café De Grens"
           className="bg-stone-800 border-stone-700 text-stone-100"
         />
       </div>
@@ -271,6 +284,12 @@ export default function TeamsPage() {
                           {team.notebookLocation ?? 'Onder de trap (standaard)'}
                         </span>
                       </p>
+                      {team.barName && (
+                        <p className="text-stone-500 text-sm mt-0.5">
+                          Bar:{' '}
+                          <span className="text-stone-400 font-mono text-xs">{team.barName}</span>
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       {/* Playtest toggle */}

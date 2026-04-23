@@ -76,6 +76,7 @@ export interface TeamDTO {
   name: string;
   notebookLocation?: string | null;
   isPlaytest?: boolean;
+  barName?: string | null;
 }
 
 export interface LocationCodeDTO {
@@ -104,6 +105,30 @@ export interface TeamProgressDTO {
     code: string | null;
     locationName: string | null;
     unlockedAt: string;
+  }>;
+}
+
+export interface TeamDetailDTO {
+  teamId: number;
+  teamName: string;
+  notebookLocation: string;
+  members: Array<{ id: string; email: string | null; fullName: string | null }>;
+  progress: {
+    isNotebookUnlocked: boolean;
+    canAccessChat: boolean;
+    canSubmitTip: boolean;
+    tipSubmitted: boolean;
+    tipSuspectId?: string | null;
+    tipMotive?: string | null;
+    tipIsCorrect?: boolean | null;
+  } | null;
+  unlockedCodes: Array<{
+    code: string | null;
+    locationName: string | null;
+    unlockedAt: string;
+    characterId: number | null;
+    characterName: string | null;
+    chats: Array<{ role: string; message: string }>;
   }>;
 }
 
@@ -142,6 +167,7 @@ export interface GameStatusResponse {
   canAccessChat?: boolean;
   canSubmitTip?: boolean;
   isPlaytest?: boolean;
+  barName?: string | null;
 }
 
 export interface TipResult {
@@ -420,6 +446,8 @@ export const adminApi = {
     }),
   getTeamProgress: () =>
     fetchApi<TeamProgressDTO[]>('/api/Admin/TeamProgress'),
+  getTeamDetail: (teamId: number) =>
+    fetchApi<TeamDetailDTO>(`/api/Admin/TeamDetail/${teamId}`),
   setProgress: (teamId: number, flags: { isNotebookUnlocked?: boolean; canAccessChat?: boolean; canSubmitTip?: boolean }) =>
     fetchApi<void>('/api/Admin/SetProgress', {
       method: 'POST',

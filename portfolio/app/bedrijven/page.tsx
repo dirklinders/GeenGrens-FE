@@ -66,7 +66,7 @@ export default function BedrijvenPage() {
           <li>
             KvK (Kamer van Koophandel):{" "}
             <a
-              href="https://kvk.nl"
+              href="https://www.kvk.nl/zoeken/"
               target="_blank"
               rel="noopener noreferrer"
               className="underline"

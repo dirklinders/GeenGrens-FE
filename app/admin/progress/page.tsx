@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import useSWR from 'swr';
 import { adminApi, type TeamProgressDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -120,12 +121,20 @@ function TeamCard({ team, onUpdate }: { team: TeamProgressDTO; onUpdate: () => v
               <span className="font-mono text-stone-400">{team.notebookLocation}</span>
             </p>
           </div>
-          <button
-            onClick={() => setShowOverride(!showOverride)}
-            className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
-          >
-            Aanpassen
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/admin/teams/${team.teamId}`}
+              className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
+            >
+              Bekijk chats →
+            </Link>
+            <button
+              onClick={() => setShowOverride(!showOverride)}
+              className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
+            >
+              Aanpassen
+            </button>
+          </div>
         </div>
       </CardHeader>
 

@@ -65,7 +65,7 @@ export function Numpad({
               className="relative flex-1 flex items-center justify-center text-center"
             >
               {isFilled ? (
-                <span className="text-stone-100 text-xl">*</span>
+                <span className="text-stone-100 text-xl">{value[i]}</span>
               ) : bgLetter ? (
                 <span className="text-stone-500 text-xs font-sans select-none opacity-50 tracking-normal">
                   {bgLetter}

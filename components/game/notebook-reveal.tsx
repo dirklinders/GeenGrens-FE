@@ -30,7 +30,7 @@ export function NotebookReveal({ location }: NotebookRevealProps) {
 
           {/* Instructions - handwritten yellow */}
           <div className="font-[family-name:var(--font-handwritten)] text-lg text-amber-300/90 leading-relaxed">
-            <p>In mijn notitieboekje heb ik om de achtervolgers te slim af te zijn steeds een andere vercijfering gebruikt. Ik hoop dat je slim genoeg bent om de puzzels op te lossen en in mijn voetsporen te treden.</p>
+            <p>In mijn notitieboekje heb voor de zekerheid vercijfering gebruikt. Ik denk dat in mijn voetsporen treden een goede weg is om de puzzels op te lossen.</p>
           </div>
         </div>
       </div>
@@ -53,17 +53,12 @@ export function NotebookReveal({ location }: NotebookRevealProps) {
             </svg>
           </div>
           <p className="text-stone-400 text-sm text-center">
-            Je kan de NFC tags met dit logo scannen om je voortgang te tracken
+            Je moet de NFC tags met dit logo scannen om met verdachten te kunnen praten.
+            Let op dat je niet meer met verdachten kan praten als je de nieuwe code scant.
           </p>
         </div>
       </div>
-
-      {/* Semi-hidden Caesar cipher hint */}
-      <div className="max-w-xl mx-auto">
-        <p className="text-stone-800 text-[10px] text-right pr-4 select-none opacity-30 hover:opacity-60 transition-opacity">
-          A {'->'} D = 3
-        </p>
-      </div>
+      
     </div>
   );
 }
