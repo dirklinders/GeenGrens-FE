@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
@@ -137,23 +136,6 @@ function UnlockContent() {
             </CardContent>
           </Card>
         )}
-
-        {/* Notebook reference */}
-        <Link href="/notebook">
-          <Card className="bg-amber-950/30 border-amber-800/50 mt-6 hover:bg-amber-950/50 hover:border-amber-700 transition-colors cursor-pointer">
-            <CardContent className="pt-6 pb-5">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl flex-shrink-0">📓</span>
-                <div>
-                  <h3 className="text-amber-300 font-medium mb-1">Raadpleeg het notitieboek →</h3>
-                  <p className="text-amber-200/70 text-sm leading-relaxed">
-                    De aanwijzingen voor de volgende locatie staan in het notitieboekje van Viktor.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
 
         {/* Instructions */}
         <Card className="bg-stone-900/50 border-stone-800 mt-6">

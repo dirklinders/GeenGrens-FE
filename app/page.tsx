@@ -48,7 +48,7 @@ function GameHomeContent() {
       <main className="py-8 md:py-12 px-4">
         <div className="max-w-2xl mx-auto">
           {notebookLocation ? (
-            <NotebookReveal location={notebookLocation} />
+            <NotebookReveal location={notebookLocation} isPlaytest={gameStatus?.isPlaytest ?? false} />
           ) : (
             <SecretMessage onSuccess={handlePasswordSuccess} />
           )}
