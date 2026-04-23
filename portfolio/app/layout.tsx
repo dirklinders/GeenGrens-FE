@@ -23,9 +23,6 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: 'Grensverkenner - Observaties van Viktor Vermeer',
   description: 'Ontdek de fascinerende wereld van Baarle-Nassau en Baarle-Hertog, de meest complexe grensstructuur ter wereld.',
-  icons: {
-    icon: '/favicon.ico',
-  },
 }
 
 export default function RootLayout({
