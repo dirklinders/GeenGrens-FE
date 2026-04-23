@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
-import { gameApi } from '@/lib/api';
+import { gameApi, unlockApi } from '@/lib/api';
 
 // ────────────────────────────────────────────────────────────
 // Page content types
@@ -172,10 +173,31 @@ function FillLine({ words }: { words: number[] }) {
 // Notebook page renderer
 // ────────────────────────────────────────────────────────────
 
-function NotebookPageElement({ lines, pageNumber }: { lines: Line[]; pageNumber: number }) {
+function NotebookPageElement({ lines, pageNumber, showNokiaHint = false }: { lines: Line[]; pageNumber: number; showNokiaHint?: boolean }) {
   return (
-    <div className="notebook-page">
+    <div className="notebook-page" style={{ position: 'relative' }}>
       <div className="page-number">{pageNumber}</div>
+
+      {/* Subtle Nokia keyboard watermark — only visible after first unlock */}
+      {showNokiaHint && (
+        <div style={{
+          position: 'absolute',
+          bottom: '2rem',
+          right: '1.5rem',
+          opacity: 0.12,
+          pointerEvents: 'none',
+          transform: 'rotate(3deg)',
+          zIndex: 0,
+        }}>
+          <Image
+            src="/images/pages/nokia-keyboard.png"
+            alt=""
+            width={120}
+            height={90}
+            style={{ filter: 'sepia(1) brightness(0.6)' }}
+          />
+        </div>
+      )}
 
       {lines.map((line, i) => {
         switch (line.type) {
@@ -248,6 +270,14 @@ function NotebookContent() {
     { revalidateOnFocus: false }
   );
 
+  const { data: unlockedCodes } = useSWR(
+    'unlocked-codes-notebook',
+    () => unlockApi.getUnlocked(),
+    { revalidateOnFocus: false }
+  );
+
+  const hasUnlockedCharacter = (unlockedCodes?.length ?? 0) > 0;
+
   useEffect(() => {
     if (!isLoading && gameStatus && !gameStatus.isPlaytest) {
       router.push('/');
@@ -280,7 +310,11 @@ function NotebookContent() {
           </div>
 
           {/* Page content */}
-          <NotebookPageElement lines={PAGES[currentPage]} pageNumber={currentPage + 1} />
+          <NotebookPageElement
+            lines={PAGES[currentPage]}
+            pageNumber={currentPage + 1}
+            showNokiaHint={currentPage === 1 && hasUnlockedCharacter}
+          />
         </div>
 
         {/* Navigation */}
