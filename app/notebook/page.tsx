@@ -63,18 +63,18 @@ const PAGE_2: Line[] = [
 // ────────────────────────────────────────────────────────────
 
 const PAGE_3: Line[] = [
-  { type: 'text',  content: 'Ssldhtgi — bgki. Guub driigua, nuub lksu. Blegu wuad zubtwlchsgn. Wunnumrffueds.' },
-  { type: 'text',  content: 'Celui nuiparkub. Obskubdu leeui. Kubs olamlb bgus, brrgs zlkub nudllb. Tu neld.' },
-  { type: 'text',  content: 'Lgus bllm Hubk du Jrbn vleeub. Dlla kblpsu guis.' },
-  { type: 'text',  content: 'Sbuaubd:'},
-  { type: 'quote', content: '"Lukkua leeumlle mus dgu ertbnuola. Mlla krm rp — Oagubslegi? Dru bramlle."' },
-  { type: 'text',  content: 'Buiufsu musuub dls hgj su vuue zug. Sucauslauiiu uaogj, du nlbn rp nuorbjrtad.' },
+  { type: 'text',  content: 'isldhtgi — bgki. nuub driigua, nuub lksu. olegu wuad zubtwlchsgn. Wunnumrffueds.' },
+  { type: 'text',  content: 'Celui nuiparkub. rbskubdu leeui. Kubs olamlb bgus, brrgs zlkub nudllb. su neld.' },
+  { type: 'text',  content: 'egus bllm Hubk du Jrbn vleeub. Dlla kblpsu gusi.' },
+  { type: 'text',  content: 'ibuaubd:' },
+  { type: 'quote', content: '"eukkua leeumlle mus dgu ertbnuola. Mlla krm rp — ragubslegi? Dru bramlle."' },
+  { type: 'text',  content: 'ouiufsu musuub dls hgj su vuue zug. iucauslauiiu uaogj, du nlbn rp nuorbjrtad.' },
   { type: 'spacer' },
-  { type: 'arrow',  content: 'Naam loungebar:' },
-  { type: 'cipher', words: ['Lrtbnuola', 'Oagubslegi'] },
+  { type: 'arrow',  content: 'bllm ertbnuola:' },
+  { type: 'cipher', words: ['ertbnuola', 'ragubslegi'] },
   { type: 'spacer' },
   { type: 'text',  content: 'Kubs du bllm le. Dls gi hus vuaolbd.' },
-  { type: 'text',  content: 'Zu egunub leeu dagu. Gl vlblvrbd zuef kgjkub rp hus puacuue. Vrra hus drbkua. Frsr\'i mlkub.' },
+  { type: 'text',  content: 'Zu egunub leeu dagu. nl vlblvrbd zuef kgjkub rp hus puacuue. Vrra hus drbkua. Frsr\'i mlkub.' },
   { type: 'text',  content: 'Mllbdln du kalbs gb.' },
 ];
 
