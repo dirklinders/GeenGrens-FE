@@ -233,9 +233,9 @@ function CipherLine({ words }: { words: string[] }) {
 // Notebook page renderer
 // ────────────────────────────────────────────────────────────
 
-function NotebookPageElement({ lines, pageNumber, showNokiaHint = false }: { lines: Line[]; pageNumber: number; showNokiaHint?: boolean }) {
+function NotebookPageElement({ lines, pageNumber, showNokiaHint = false, scrollX = false }: { lines: Line[]; pageNumber: number; showNokiaHint?: boolean; scrollX?: boolean }) {
   return (
-    <div className="notebook-page" style={{ position: 'relative' }}>
+    <div className="notebook-page" style={{ position: 'relative', overflowX: scrollX ? 'auto' : undefined }}>
       <div className="page-number">{pageNumber}</div>
 
       {/* Subtle Nokia keyboard watermark — only visible after first unlock */}
@@ -377,6 +377,7 @@ function NotebookContent() {
             lines={PAGES[currentPage]}
             pageNumber={currentPage + 1}
             showNokiaHint={currentPage === 1 && hasUnlockedCharacter}
+            scrollX={currentPage === 1}
           />
         </div>
 
