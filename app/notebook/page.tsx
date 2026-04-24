@@ -70,7 +70,7 @@ const PAGE_3: Line[] = [
   { type: 'quote', content: '"eukkua leeumlle mus dgu ertbnuola. Mlla krm rp — ragubslegi? Dru bramlle."' },
   { type: 'text',  content: 'ouiufsu musuub dls hgj su vuue zug. iucauslauiiu uaogj, du nlbn rp nuorbjrtad.' },
   { type: 'spacer' },
-  { type: 'arrow',  content: 'bllm ertbnuola:' },
+  { type: 'arrow',  content: 'Naam loungebar:' },
   { type: 'cipher', words: ['ertbnuola', 'ragubslegi'] },
   { type: 'spacer' },
   { type: 'text',  content: 'Kubs du bllm le. Dls gi hus vuaolbd.' },
