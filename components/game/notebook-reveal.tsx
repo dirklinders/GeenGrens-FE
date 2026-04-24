@@ -21,7 +21,8 @@ export function NotebookReveal({ location, isPlaytest = false }: NotebookRevealP
           {/* Viktor's message */}
           <div className="font-[family-name:var(--font-handwritten)] text-xl text-amber-200/90 leading-relaxed space-y-4">
             <p>Oke, je bent niet een van hun gelukkig.</p>
-            <p>Ik heb mijn notitieboekje moeten verstoppen, hij ligt:</p>
+            <p>Ik heb mijn notitieboekje moeten verbranden, <br/>
+              maar niet voordat ik hem digitaal gekopieerd heb voor deze site.</p>
           </div>
 
           {/* Location reveal — or notebook link for playtest teams */}
@@ -68,7 +69,7 @@ export function NotebookReveal({ location, isPlaytest = false }: NotebookRevealP
             </svg>
           </div>
           <p className="text-stone-400 text-sm text-center">
-            Je moet de NFC tags met dit logo scannen om met verdachten te kunnen praten.
+            Je moet de NFC tags met (ongeveer) dit logo scannen om met verdachten te kunnen praten.
             Let op dat je niet meer met verdachten kan praten als je een nieuwe code scant.
           </p>
         </div>
