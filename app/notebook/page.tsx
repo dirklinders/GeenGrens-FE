@@ -18,6 +18,7 @@ type Line =
   | { type: 'arrow';  content: string }
   | { type: 'note';   content: string }          // !! annotation
   | { type: 'fill';   words: number[] }          // infillable boxes
+  | { type: 'cipher'; words: string[] }          // cipher letter + fill box per letter
   | { type: 'spacer' }
   | { type: 'rule' };
 
@@ -91,7 +92,9 @@ const PAGE_3: Line[] = [
   { type: 'text',  content: 'gk mrchs rbmgddueegjk vuasaukkub.' },
   { type: 'note',  content: 'Lussuaegjk du nlbn rp nuorbjrtad.' },
   { type: 'spacer' },
-  { type: 'arrow', content: 'Naam van die loungebar is dus:\nertbnuola ragubslegi.\nHgj kubs du pelbbub vlb Hubk.\nHgj kubs dti rrk du bllm uavlb vrradls dgu ptoeguk gi.\nDls gi hus vuaolbd.' },
+  { type: 'arrow',  content: 'Naam van die loungebar is dus:' },
+  { type: 'cipher', words: ['ertbnuola', 'ragubslegi'] },
+  { type: 'arrow',  content: 'Hgj kubs du pelbbub vlb Hubk.\nHgj kubs dti rrk du bllm uavlb vrradls dgu ptoeguk gi.\nDls gi hus vuaolbd.' },
   { type: 'spacer' },
   { type: 'text',  content: 'Gubrun nupalls mus dgu nlisub. Zu egunub leeu dagu.' },
   { type: 'text',  content: 'Ik nl vlblvrbd zuef blla dls puacuue,' },
@@ -160,6 +163,75 @@ function FillLine({ words }: { words: number[] }) {
                   autoComplete="off"
                   spellCheck={false}
                 />
+              );
+            })}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────
+// Cipher fill component  (cipher letter on top, fill box below)
+// ────────────────────────────────────────────────────────────
+
+function CipherLine({ words }: { words: string[] }) {
+  const totalBoxes = words.reduce((a, b) => a + b.length, 0);
+  const [values, setValues] = useState<string[]>(Array(totalBoxes).fill(''));
+  const refs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const focus = (idx: number) => {
+    setTimeout(() => refs.current[idx]?.focus(), 0);
+  };
+
+  const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (values[idx]) {
+        setValues(prev => { const n = [...prev]; n[idx] = ''; return n; });
+      } else if (idx > 0) {
+        setValues(prev => { const n = [...prev]; n[idx - 1] = ''; return n; });
+        focus(idx - 1);
+      }
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+      e.preventDefault(); focus(idx - 1);
+    } else if (e.key === 'ArrowRight' && idx < totalBoxes - 1) {
+      e.preventDefault(); focus(idx + 1);
+    } else if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+      e.preventDefault();
+      setValues(prev => { const n = [...prev]; n[idx] = e.key.toUpperCase(); return n; });
+      if (idx < totalBoxes - 1) focus(idx + 1);
+    }
+  };
+
+  let gi = 0;
+  return (
+    <div className="cipher-line">
+      {words.map((word, wi) => {
+        const startIdx = gi;
+        gi += word.length;
+        return (
+          <span key={wi} className="cipher-group">
+            {wi > 0 && <span className="cipher-word-gap" />}
+            {[...word].map((ch, li) => {
+              const idx = startIdx + li;
+              return (
+                <span key={li} className="cipher-cell">
+                  <span className="cipher-letter">{ch}</span>
+                  <input
+                    ref={el => { refs.current[idx] = el; }}
+                    value={values[idx]}
+                    readOnly
+                    onKeyDown={e => handleKeyDown(idx, e)}
+                    onClick={() => refs.current[idx]?.focus()}
+                    className="fill-box"
+                    type="text"
+                    tabIndex={0}
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </span>
               );
             })}
           </span>
@@ -242,6 +314,9 @@ function NotebookPageElement({ lines, pageNumber, showNokiaHint = false }: { lin
 
           case 'fill':
             return <FillLine key={i} words={line.words} />;
+
+          case 'cipher':
+            return <CipherLine key={i} words={line.words} />;
 
           case 'text':
           default:
@@ -557,6 +632,43 @@ function NotebookContent() {
 
         /* Remove text cursor on readonly */
         .fill-box::selection { background: transparent; }
+
+        /* Cipher fill — letter on top, fill box below */
+        .cipher-line {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-end;
+          gap: 0;
+          padding-left: 8px;
+          padding-top: 6px;
+          padding-bottom: 6px;
+        }
+
+        .cipher-group {
+          display: inline-flex;
+          gap: 4px;
+        }
+
+        .cipher-word-gap {
+          display: inline-block;
+          width: 22px;
+        }
+
+        .cipher-cell {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1px;
+        }
+
+        .cipher-letter {
+          font-family: 'Caveat', cursive, sans-serif;
+          font-size: 13px;
+          color: #7a6a50;
+          line-height: 1;
+          letter-spacing: 0;
+          user-select: none;
+        }
       `}</style>
     </div>
   );
