@@ -175,7 +175,7 @@ function CharacterForm({
 // ────────────────────────────────────────────────────────────
 
 interface TestMessage {
-  role: 'User' | 'Assistant';
+  role: 'User' | 'Assistant' | 'System';
   content: string;
   streaming?: boolean;
 }
@@ -191,12 +191,15 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
+  const [isEnded, setIsEnded] = useState(false);
+
   const resetChat = () => {
     abortRef.current?.abort();
     abortRef.current = null;
     setHistory([]);
     setInput('');
     setIsStreaming(false);
+    setIsEnded(false);
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -239,7 +242,16 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
           });
           scrollToBottom();
         },
-        controller.signal
+        controller.signal,
+        () => {
+          // Tool call fired — mark conversation as ended and add a system notice
+          setIsEnded(true);
+          setHistory(prev => [
+            ...prev,
+            { role: 'System', content: '🚪 beeindig_gesprek aangeroepen — personage heeft het gesprek beëindigd.' },
+          ]);
+          scrollToBottom();
+        }
       );
 
       // Mark streaming done
@@ -300,23 +312,31 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
           </p>
         )}
         {history.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex gap-2 ${msg.role === 'User' ? 'flex-row-reverse' : ''}`}
-          >
-            <div
-              className={`max-w-[80%] px-3 py-2 rounded-lg text-xs leading-relaxed ${
-                msg.role === 'User'
-                  ? 'bg-stone-700 text-stone-100 rounded-br-none'
-                  : 'bg-stone-800 text-stone-200 rounded-bl-none border border-stone-700'
-              }`}
-            >
-              {msg.content || <span className="text-stone-500 animate-pulse">…</span>}
-              {msg.streaming && (
-                <span className="inline-block w-1 h-3 bg-stone-400 ml-0.5 align-middle animate-pulse rounded-sm" />
-              )}
+          msg.role === 'System' ? (
+            <div key={i} className="text-center">
+              <span className="text-amber-600 text-xs bg-amber-950 border border-amber-800 px-2 py-1 rounded">
+                {msg.content}
+              </span>
             </div>
-          </div>
+          ) : (
+            <div
+              key={i}
+              className={`flex gap-2 ${msg.role === 'User' ? 'flex-row-reverse' : ''}`}
+            >
+              <div
+                className={`max-w-[80%] px-3 py-2 rounded-lg text-xs leading-relaxed ${
+                  msg.role === 'User'
+                    ? 'bg-stone-700 text-stone-100 rounded-br-none'
+                    : 'bg-stone-800 text-stone-200 rounded-bl-none border border-stone-700'
+                }`}
+              >
+                {msg.content || <span className="text-stone-500 animate-pulse">…</span>}
+                {msg.streaming && (
+                  <span className="inline-block w-1 h-3 bg-stone-400 ml-0.5 align-middle animate-pulse rounded-sm" />
+                )}
+              </div>
+            </div>
+          )
         ))}
         <div ref={bottomRef} />
       </div>
@@ -326,8 +346,8 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`Stel een vraag aan ${character.name}...`}
-          disabled={isStreaming}
+          placeholder={isEnded ? 'Gesprek beëindigd — klik "Nieuw gesprek" om opnieuw te beginnen' : `Stel een vraag aan ${character.name}...`}
+          disabled={isStreaming || isEnded}
           className="flex-1 bg-stone-800 border-stone-700 text-stone-100 text-sm h-8"
         />
         <Button
