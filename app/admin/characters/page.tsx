@@ -29,6 +29,9 @@ function CharacterForm({
   const [systemPrompt, setSystemPrompt] = useState(initial?.systemPrompt ?? '');
   const [avatarUrl, setAvatarUrl] = useState(initial?.avatarUrl ?? '');
   const [personality, setPersonality] = useState(initial?.personality ?? '');
+  const [stopKeywordAlibi, setStopKeywordAlibi] = useState(initial?.stopKeywordAlibi ?? '');
+  const [stopKeywordConnection, setStopKeywordConnection] = useState(initial?.stopKeywordConnection ?? '');
+  const [stopKeywordHint, setStopKeywordHint] = useState(initial?.stopKeywordHint ?? '');
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'prompt'>('basic');
 
@@ -43,6 +46,9 @@ function CharacterForm({
         systemPrompt,
         avatarUrl,
         personality: personality || null,
+        stopKeywordAlibi: stopKeywordAlibi || null,
+        stopKeywordConnection: stopKeywordConnection || null,
+        stopKeywordHint: stopKeywordHint || null,
       });
     } finally {
       setSaving(false);
@@ -104,6 +110,41 @@ function CharacterForm({
               placeholder="bijv. Nerveus, defensief, vermijdt oogcontact"
               className="bg-stone-800 border-stone-700 text-stone-100"
             />
+          </div>
+
+          <div className="border-t border-stone-700 pt-3 mt-1">
+            <p className="text-stone-500 text-xs mb-3">
+              Stop-conditie trefwoorden — het gesprek sluit automatisch zodra alle drie in de antwoorden van het personage zijn voorbijgekomen.
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Label className="text-stone-400 text-xs w-24 shrink-0">Alibi</Label>
+                <Input
+                  value={stopKeywordAlibi}
+                  onChange={(e) => setStopKeywordAlibi(e.target.value)}
+                  placeholder="bijv. hoefnagels"
+                  className="bg-stone-800 border-stone-700 text-stone-100 text-sm h-8"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Label className="text-stone-400 text-xs w-24 shrink-0">Connectie</Label>
+                <Input
+                  value={stopKeywordConnection}
+                  onChange={(e) => setStopKeywordConnection(e.target.value)}
+                  placeholder="bijv. rikkert"
+                  className="bg-stone-800 border-stone-700 text-stone-100 text-sm h-8"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Label className="text-stone-400 text-xs w-24 shrink-0">Hint</Label>
+                <Input
+                  value={stopKeywordHint}
+                  onChange={(e) => setStopKeywordHint(e.target.value)}
+                  placeholder="bijv. nokia"
+                  className="bg-stone-800 border-stone-700 text-stone-100 text-sm h-8"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-1">
@@ -340,6 +381,31 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
         ))}
         <div ref={bottomRef} />
       </div>
+
+      {/* Stop-condition debug indicators — only shown when keywords are configured */}
+      {(character.stopKeywordAlibi || character.stopKeywordConnection || character.stopKeywordHint) && (() => {
+        const assistantText = history
+          .filter(m => m.role === 'Assistant')
+          .map(m => m.content)
+          .join(' ')
+          .toLowerCase();
+        const condAlibi      = !!character.stopKeywordAlibi      && assistantText.includes(character.stopKeywordAlibi.toLowerCase());
+        const condConnection = !!character.stopKeywordConnection && assistantText.includes(character.stopKeywordConnection.toLowerCase());
+        const condHint       = !!character.stopKeywordHint       && assistantText.includes(character.stopKeywordHint.toLowerCase());
+        return (
+          <div className="flex gap-4 text-xs px-1">
+            <span className={condAlibi ? 'text-green-500' : 'text-stone-600'}>
+              {condAlibi ? '✓' : '○'} Alibi <span className="opacity-50">({character.stopKeywordAlibi})</span>
+            </span>
+            <span className={condConnection ? 'text-green-500' : 'text-stone-600'}>
+              {condConnection ? '✓' : '○'} Connectie <span className="opacity-50">({character.stopKeywordConnection})</span>
+            </span>
+            <span className={condHint ? 'text-green-500' : 'text-stone-600'}>
+              {condHint ? '✓' : '○'} Hint <span className="opacity-50">({character.stopKeywordHint})</span>
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Input */}
       <form onSubmit={handleSend} className="flex gap-2">

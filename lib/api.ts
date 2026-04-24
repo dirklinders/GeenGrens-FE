@@ -58,6 +58,12 @@ export interface CharacterDTO {
   systemPrompt: string | null;
   avatarUrl: string | null;
   personality: string | null;
+  /** Keyword to detect in assistant replies confirming the alibi was mentioned */
+  stopKeywordAlibi: string | null;
+  /** Keyword to detect in assistant replies confirming the connection was mentioned */
+  stopKeywordConnection: string | null;
+  /** Keyword to detect in assistant replies confirming the hint was mentioned */
+  stopKeywordHint: string | null;
 }
 
 export interface ChatDTO {
