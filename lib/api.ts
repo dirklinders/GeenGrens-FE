@@ -304,7 +304,8 @@ export const chatApi = {
 async function consumeSseStream(
   response: Response,
   onChunk: (text: string) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onEnded?: () => void
 ): Promise<string> {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
@@ -323,8 +324,9 @@ async function consumeSseStream(
       const data = line.slice(6);
       if (data === '[DONE]') return full;
       try {
-        const parsed = JSON.parse(data) as { text?: string; error?: string };
+        const parsed = JSON.parse(data) as { text?: string; ended?: boolean; error?: string };
         if (parsed.error) throw new Error(parsed.error);
+        if (parsed.ended) { onEnded?.(); continue; }
         if (parsed.text) {
           full += parsed.text;
           onChunk(parsed.text);
@@ -344,13 +346,15 @@ export const chatFeApi = {
   /**
    * Stream a team-scoped chat response.
    * onChunk is called with each token as it arrives.
+   * onEnded is called (once) if the AI triggered the stop-condition tool.
    * Returns the full assembled response text.
    */
   streamChat: async (
     characterId: number,
     question: string,
     onChunk: (text: string) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onEnded?: () => void
   ): Promise<string> => {
     const url = `${API_BASE_URL}/api/ChatFE/stream?characterId=${characterId}&question=${encodeURIComponent(question)}`;
     const response = await fetch(url, {
@@ -358,12 +362,13 @@ export const chatFeApi = {
       signal,
     });
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    return consumeSseStream(response, onChunk, signal);
+    return consumeSseStream(response, onChunk, signal, onEnded);
   },
 
   /**
    * Stream an admin test chat response (no DB reads/writes).
    * onChunk is called with each token as it arrives.
+   * onEnded is called if the AI triggered the stop-condition tool.
    * Returns the full assembled response text.
    */
   streamAdminTest: async (
@@ -371,7 +376,8 @@ export const chatFeApi = {
     question: string,
     history: AdminMessageDTO[],
     onChunk: (text: string) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onEnded?: () => void
   ): Promise<string> => {
     const url = `${API_BASE_URL}/api/ChatFE/admin-test-stream`;
     const response = await fetch(url, {
@@ -382,7 +388,7 @@ export const chatFeApi = {
       signal,
     });
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    return consumeSseStream(response, onChunk, signal);
+    return consumeSseStream(response, onChunk, signal, onEnded);
   },
 };
 

@@ -69,6 +69,7 @@ function ChatContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localMessages, setLocalMessages] = useState<LocalMessage[]>([]);
   const [streamingText, setStreamingText] = useState<string | null>(null);
+  const [isConversationEnded, setIsConversationEnded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -146,13 +147,19 @@ function ChatContent() {
 
   const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
 
-  // Sync chat history to local state
+  // Sync chat history to local state; detect persisted ended-state marker
   const chatHistoryRef = useRef<ChatDTO[] | undefined>();
   useEffect(() => {
     if (chatHistory && chatHistory !== chatHistoryRef.current) {
       chatHistoryRef.current = chatHistory;
+      const hasEndedMarker = chatHistory.some(
+        m => m.role === 'System' && m.message === '[BEËINDIGD]'
+      );
+      setIsConversationEnded(hasEndedMarker);
       setLocalMessages(
-        chatHistory.map((m, i) => ({ id: i, role: m.role, message: m.message }))
+        chatHistory
+          .filter(m => m.role !== 'System')                          // hide system markers from UI
+          .map((m, i) => ({ id: i, role: m.role, message: m.message }))
       );
     }
   }, [chatHistory]);
@@ -173,6 +180,7 @@ function ChatContent() {
     setStreamingText(null);
     setSelectedCharacterId(id);
     setLocalMessages([]);
+    setIsConversationEnded(false);
     setSidebarOpen(false);
   }, []);
 
@@ -204,7 +212,8 @@ function ChatContent() {
           accumulated += chunk;
           setStreamingText(accumulated);
         },
-        controller.signal
+        controller.signal,
+        () => setIsConversationEnded(true)
       );
 
       // Stream complete — promote streaming text to a real message
@@ -362,6 +371,12 @@ function ChatContent() {
               <div className="px-3 sm:px-4 py-3 max-w-3xl mx-auto">
                 <p className="text-stone-500 text-sm text-center">
                   🔒 Dit verhoor is afgesloten — je hebt een nieuwe locatie ontdekt. Je kunt het gesprek nog wel teruglezen.
+                </p>
+              </div>
+            ) : isConversationEnded ? (
+              <div className="px-3 sm:px-4 py-3 max-w-3xl mx-auto">
+                <p className="text-stone-500 text-sm text-center">
+                  🚪 {selectedCharacter?.name ?? 'De verdachte'} heeft het gesprek beëindigd.
                 </p>
               </div>
             ) : (
