@@ -55,7 +55,7 @@ export function NotebookReveal({ location, isPlaytest = false }: NotebookRevealP
       <div className="max-w-xl mx-auto md:ml-auto md:mr-8 md:max-w-xs">
         <div className="bg-stone-800/50 border border-stone-700 rounded-lg p-4 space-y-3">
           {/* NFC Logo placeholder */}
-          <div className="w-12 h-12 mx-auto bg-stone-700 rounded-lg flex items-center justify-center border border-stone-600 relative">
+          <div className="w-12 h-12 mx-auto bg-stone-700 rounded-lg flex items-center justify-center border border-stone-600">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -66,8 +66,16 @@ export function NotebookReveal({ location, isPlaytest = false }: NotebookRevealP
               <path d="M6 12c0-3.5 2.5-6 6-6s6 2.5 6 6-2.5 6-6 6" strokeLinecap="round" />
               <path d="M9 12c0-1.5 1-3 3-3s3 1.5 3 3-1 3-3 3" strokeLinecap="round" />
               <circle cx="12" cy="12" r="1" fill="currentColor" />
+              <text
+                x="1.5"
+                y="23"
+                fill="currentColor"
+                stroke="none"
+                fontSize="5"
+                fontWeight="bold"
+                fontFamily="sans-serif"
+              >gg</text>
             </svg>
-            <span className="absolute bottom-0.5 left-1 text-amber-500 font-bold leading-none" style={{ fontSize: '7px' }}>gg</span>
           </div>
           <p className="text-stone-400 text-sm text-center">
             Je moet de NFC tags met (ongeveer) dit logo scannen om met verdachten te kunnen praten.
