@@ -65,7 +65,7 @@ const PAGE_2: Line[] = [
 // ────────────────────────────────────────────────────────────
 
 const PAGE_3: Line[] = [
-  { type: 'text',  content: 'B-H 25-04-2026'}
+  { type: 'text',  content: 'B-H 25-04-2026'},
   { type: 'text',  content: 'isldhtgi — bgki. nuub driigua, nuub lksu. olegu wuad zubtwlchsgn. Wunnumrffueds.' },
   { type: 'text',  content: 'Celui nuiparkub. rbskubdu leeui. Kubs olamlb bgus, brrgs zlkub nudllb. su neld.' },
   { type: 'text',  content: 'egus bllm Hubk du Jrbn vleeub. Dlla kblpsu gusi.' },
