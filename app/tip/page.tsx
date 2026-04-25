@@ -10,16 +10,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 function TipContent() {
   const router = useRouter();
-  const [selectedSuspect, setSelectedSuspect] = useState('');
+  const [selectedSuspects, setSelectedSuspects] = useState<string[]>([]);
   const [motive, setMotive] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ isCorrect: boolean; alreadySubmitted: boolean } | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  const toggleSuspect = (key: string) => {
+    setSelectedSuspects(prev =>
+      prev.includes(key) ? prev.filter(s => s !== key) : [...prev, key]
+    );
+  };
 
   // Check access permission
   const { data: gameStatus, isLoading: statusLoading } = useSWR(
@@ -44,7 +49,7 @@ function TipContent() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSuspect || !motive.trim()) return;
+    if (selectedSuspects.length === 0 || !motive.trim()) return;
     setShowConfirmation(true);
   };
 
@@ -54,7 +59,7 @@ function TipContent() {
     setSubmitError('');
 
     try {
-      const res = await tipApi.submit(selectedSuspect, motive);
+      const res = await tipApi.submit(selectedSuspects.join(','), motive);
       setResult(res);
     } catch {
       setSubmitError('Er is een fout opgetreden bij het indienen van de melding. Probeer het opnieuw.');
@@ -154,7 +159,7 @@ function TipContent() {
         <Card className="bg-stone-900 border-stone-800">
           <CardHeader>
             <CardTitle className="font-serif text-2xl text-stone-100">
-              Anonieme Melding bij de Politie
+              Rapporteer terug aan R.
             </CardTitle>
             <CardDescription className="text-stone-400">
               Je hebt genoeg bewijzen verzameld. Wijs de moordenaar aan en leg uit wat het motief was.
@@ -172,24 +177,26 @@ function TipContent() {
                     ))}
                   </div>
                 ) : (
-                  <RadioGroup
-                    value={selectedSuspect}
-                    onValueChange={setSelectedSuspect}
-                    className="space-y-2"
-                  >
+                  <div className="space-y-2">
                     {(characters ?? []).map((character) => {
                       const key = String(character.id);
+                      const isSelected = selectedSuspects.includes(key);
                       return (
                         <div
                           key={key}
-                          className="flex items-start space-x-3 bg-stone-800 p-4 rounded cursor-pointer transition-colors hover:bg-stone-750"
-                          onClick={() => setSelectedSuspect(key)}
+                          className={`flex items-start space-x-3 p-4 rounded cursor-pointer transition-colors ${
+                            isSelected ? 'bg-stone-700 ring-1 ring-red-700' : 'bg-stone-800 hover:bg-stone-750'
+                          }`}
+                          onClick={() => toggleSuspect(key)}
                         >
-                          <RadioGroupItem
-                            value={key}
-                            id={key}
-                            className="mt-1 border-stone-600 text-red-600"
-                          />
+                          {/* Radio-button-style circle indicator */}
+                          <div className={`mt-1 w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                            isSelected ? 'border-red-600' : 'border-stone-600'
+                          }`}>
+                            {isSelected && (
+                              <div className="w-2 h-2 rounded-full bg-red-600" />
+                            )}
+                          </div>
                           <div className="flex items-center gap-3">
                             {character.avatarUrl && (
                               <img
@@ -199,7 +206,7 @@ function TipContent() {
                               />
                             )}
                             <div>
-                              <Label htmlFor={key} className="text-stone-100 font-medium cursor-pointer">
+                              <Label className="text-stone-100 font-medium cursor-pointer">
                                 {character.name}
                               </Label>
                               {character.description && (
@@ -210,7 +217,7 @@ function TipContent() {
                         </div>
                       );
                     })}
-                  </RadioGroup>
+                  </div>
                 )}
               </div>
 
@@ -233,7 +240,7 @@ function TipContent() {
 
               <Button
                 type="submit"
-                disabled={!selectedSuspect || !motive.trim()}
+                disabled={selectedSuspects.length === 0 || !motive.trim()}
                 className="w-full bg-red-800 hover:bg-red-700 text-stone-100 font-medium py-6"
               >
                 Melding Indienen
@@ -255,7 +262,10 @@ function TipContent() {
                 <p className="text-stone-400">
                   Je staat op het punt om{' '}
                   <strong className="text-stone-200">
-                    {characters?.find((c) => String(c.id) === selectedSuspect)?.name}
+                    {selectedSuspects
+                      .map(id => characters?.find(c => String(c.id) === id)?.name)
+                      .filter(Boolean)
+                      .join(', ')}
                   </strong>{' '}
                   te beschuldigen van moord.
                 </p>

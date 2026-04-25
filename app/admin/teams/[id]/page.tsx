@@ -1,10 +1,14 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
-import { adminApi, type TeamDetailDTO } from '@/lib/api';
+import { adminApi, chatFeApi, type TeamDetailDTO } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+
+const SLUIT_AF_MARKER = '[SLUIT_AF]';
+const BEEINDIGD_MARKER = '[BEËINDIGD]';
 
 // ────────────────────────────────────────────────────────────
 // Helpers
@@ -77,9 +81,40 @@ function ChatTranscript({ chats }: { chats: TeamDetailDTO['unlockedCodes'][numbe
 
 function UnlockedCodeCard({
   entry,
+  teamId,
+  onEndRequested,
 }: {
   entry: TeamDetailDTO['unlockedCodes'][number];
+  teamId: number;
+  onEndRequested: () => void;
 }) {
+  const [requesting, setRequesting] = useState(false);
+  const [requestError, setRequestError] = useState('');
+
+  const isEnded = entry.chats.some(
+    c => c.role === 'System' && c.message === BEEINDIGD_MARKER
+  );
+  const isPending = !isEnded && entry.chats.some(
+    c => c.role === 'System' && c.message === SLUIT_AF_MARKER
+  );
+
+  const handleRequestEnd = async () => {
+    if (!entry.characterId) return;
+    setRequesting(true);
+    setRequestError('');
+    try {
+      await chatFeApi.requestEnd(teamId, entry.characterId);
+      onEndRequested();
+    } catch {
+      setRequestError('Mislukt, probeer opnieuw.');
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  // Count only visible (non-System) messages
+  const visibleChats = entry.chats.filter(c => c.role !== 'System');
+
   return (
     <Card className="bg-stone-900 border-stone-800">
       <CardHeader className="pb-2">
@@ -94,22 +129,48 @@ function UnlockedCodeCard({
               </p>
             )}
           </div>
-          <div className="text-right shrink-0 space-y-0.5">
+          <div className="text-right shrink-0 space-y-1.5">
             {entry.code && (
               <span className="block bg-stone-800 text-stone-300 px-2 py-0.5 rounded text-xs font-mono">
                 {entry.code}
               </span>
             )}
             <span className="block text-stone-600 text-xs">{fmt(entry.unlockedAt)}</span>
+
+            {/* Conversation state */}
+            {entry.characterId && (
+              isEnded ? (
+                <span className="block text-xs bg-stone-800 text-stone-500 border border-stone-700 px-2 py-0.5 rounded text-center">
+                  ✓ Beëindigd
+                </span>
+              ) : isPending ? (
+                <span className="block text-xs bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded text-center">
+                  ⏳ Afsluiting gevraagd
+                </span>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={requesting}
+                  onClick={handleRequestEnd}
+                  className="text-xs border-red-800 text-red-400 hover:bg-red-950 hover:text-red-300 h-6 px-2"
+                >
+                  {requesting ? '...' : 'Sluit gesprek'}
+                </Button>
+              )
+            )}
+            {requestError && (
+              <p className="text-red-400 text-xs">{requestError}</p>
+            )}
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
         <p className="text-stone-500 text-xs font-medium uppercase tracking-wide mb-1">
-          Berichten ({entry.chats.length})
+          Berichten ({visibleChats.length})
         </p>
-        <ChatTranscript chats={entry.chats} />
+        <ChatTranscript chats={visibleChats} />
       </CardContent>
     </Card>
   );
@@ -123,7 +184,7 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
   const { id } = use(params);
   const teamId = parseInt(id, 10);
 
-  const { data: team, isLoading, error } = useSWR(
+  const { data: team, isLoading, error, mutate } = useSWR(
     `admin-team-detail-${teamId}`,
     () => adminApi.getTeamDetail(teamId),
     { revalidateOnFocus: false, refreshInterval: 30_000 }
@@ -240,7 +301,12 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
             Ontgrendelde locaties & gesprekken
           </h2>
           {team.unlockedCodes.map((entry, i) => (
-            <UnlockedCodeCard key={i} entry={entry} />
+            <UnlockedCodeCard
+              key={i}
+              entry={entry}
+              teamId={teamId}
+              onEndRequested={() => mutate()}
+            />
           ))}
         </div>
       )}

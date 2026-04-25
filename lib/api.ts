@@ -383,19 +383,30 @@ export const chatFeApi = {
     history: AdminMessageDTO[],
     onChunk: (text: string) => void,
     signal?: AbortSignal,
-    onEnded?: () => void
+    onEnded?: () => void,
+    closingRequested?: boolean
   ): Promise<string> => {
     const url = `${API_BASE_URL}/api/ChatFE/admin-test-stream`;
     const response = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characterId, question, history }),
+      body: JSON.stringify({ characterId, question, history, closingRequested: closingRequested ?? false }),
       signal,
     });
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
     return consumeSseStream(response, onChunk, signal, onEnded);
   },
+
+  /**
+   * Admin: request a graceful conversation close for a team+character chat.
+   * On the player's next message the character wraps up and the chat locks.
+   */
+  requestEnd: (teamId: number, characterId: number) =>
+    fetchApi<{ success: boolean; alreadyDone: boolean }>('/api/ChatFE/request-end', {
+      method: 'POST',
+      body: JSON.stringify({ teamId, characterId }),
+    }),
 };
 
 // ────────────────────────────────────────────────────────────

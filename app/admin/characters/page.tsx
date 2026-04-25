@@ -233,6 +233,7 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
   }, []);
 
   const [isEnded, setIsEnded] = useState(false);
+  const [simulateClose, setSimulateClose] = useState(false);
 
   const resetChat = () => {
     abortRef.current?.abort();
@@ -241,6 +242,7 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
     setInput('');
     setIsStreaming(false);
     setIsEnded(false);
+    setSimulateClose(false);
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -252,10 +254,11 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
     setIsStreaming(true);
 
     // Snapshot history for request (before adding user msg to state)
-    const historyForRequest: AdminMessageDTO[] = history.map(m => ({
-      role: m.role,
-      content: m.content,
-    }));
+    const historyForRequest: AdminMessageDTO[] = history
+      .filter(m => m.role !== 'System')
+      .map(m => ({ role: m.role, content: m.content }));
+
+    const sendingClose = simulateClose;
 
     // Optimistically add user message
     setHistory(prev => [...prev, { role: 'User', content: question }]);
@@ -285,14 +288,15 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
         },
         controller.signal,
         () => {
-          // Tool call fired — mark conversation as ended and add a system notice
           setIsEnded(true);
-          setHistory(prev => [
-            ...prev,
-            { role: 'System', content: '🚪 beeindig_gesprek aangeroepen — personage heeft het gesprek beëindigd.' },
-          ]);
+          setSimulateClose(false);
+          const notice = sendingClose
+            ? '🚪 Afsluiting gesimuleerd — personage heeft het gesprek beëindigd.'
+            : '🚪 beeindig_gesprek aangeroepen — personage heeft het gesprek beëindigd.';
+          setHistory(prev => [...prev, { role: 'System', content: notice }]);
           scrollToBottom();
-        }
+        },
+        sendingClose
       );
 
       // Mark streaming done
@@ -333,17 +337,36 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
 
   return (
     <div className="mt-4 border-t border-stone-700 pt-4 space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <p className="text-stone-400 text-xs font-medium uppercase tracking-wide">
           Test gesprek (tijdelijk, niet opgeslagen)
         </p>
-        <button
-          onClick={resetChat}
-          className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
-        >
-          Nieuw gesprek
-        </button>
+        <div className="flex items-center gap-3">
+          {!isEnded && (
+            <button
+              onClick={() => setSimulateClose(v => !v)}
+              className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                simulateClose
+                  ? 'bg-amber-950 border-amber-700 text-amber-400'
+                  : 'border-stone-700 text-stone-500 hover:text-stone-300 hover:border-stone-500'
+              }`}
+            >
+              {simulateClose ? '⏳ Afsluiting actief' : 'Sluit gesprek'}
+            </button>
+          )}
+          <button
+            onClick={resetChat}
+            className="text-stone-500 hover:text-stone-300 text-xs transition-colors"
+          >
+            Nieuw gesprek
+          </button>
+        </div>
       </div>
+      {simulateClose && !isEnded && (
+        <p className="text-amber-600 text-xs px-1">
+          Volgende bericht laat het personage afsluiten en vergrendelt het gesprek.
+        </p>
+      )}
 
       {/* Message list */}
       <div className="bg-stone-950 rounded border border-stone-800 p-3 h-64 overflow-y-auto space-y-3 text-sm">
