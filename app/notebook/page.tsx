@@ -27,6 +27,7 @@ type Line =
 // ────────────────────────────────────────────────────────────
 
 function makePage1(barName: string): Line[] { return [
+  { type: 'text',  content: 'B-H 23-04-2026'},
   { type: 'text',  content: `Avond in ${barName} — jackpot. Barman veel te los` },
   { type: 'text',  content: 'na sluitingstijd, dacht waarschijnlijk dat ik al' },
   { type: 'text',  content: 'te ver heen was. Letterlijk (of zo goed als):' },
@@ -34,7 +35,7 @@ function makePage1(barName: string): Line[] { return [
   { type: 'text',  content: 'Doorgevraagd → klapte dicht. Alsof hij zich' },
   { type: 'text',  content: 'realiseerde tegen wie hij het had.' },
   { type: 'spacer' },
-  { type: 'arrow', content: 'Perceel op de hoek Molenstraat / Kerkplein.\nKadaster: 25-04-2006 overgegaan op\nene Frederik Claes — burgemeester van B-H.\nGeen overdrachtsakte. Geen verkoper.\nGeen bedrag. Niks. Een stuk grond dat\nuit de lucht valt, in handen van\nde burgemeester.' },
+  { type: 'arrow', content: 'naar deze zaterdag!9:56 AMClaude responded: Perceel op de hoek Molenstraat / Kerkplein.Perceel op de hoek Molenstraat / Kerkplein.\nKadaster: 25-04-2006 overgegaan op\nene Frederik Claes — burgemeester van B-H.\nGeen overdrachtsakte. Geen verkoper.\nGeen bedrag. Niks. Een stuk grond dat\nuit de lucht valt, in handen van\nde burgemeester.\n\nVerjaringstermijn: 20 jaar.\nDus aanstaande zaterdag\nis het juridisch onaantastbaar.\nGeen toeval dat het nú in beweging komt.\nZe rekenen die datum af.\n\nMoet vóór dan publiceren.' },
   { type: 'spacer' },
   { type: 'text',  content: 'Morgenavond terug naar de bar. Die barman' },
   { type: 'text',  content: 'weet meer. Moet hem aan de praat krijgen.' },
@@ -45,6 +46,7 @@ function makePage1(barName: string): Line[] { return [
 // ────────────────────────────────────────────────────────────
 
 const PAGE_2: Line[] = [
+  { type: 'text', content: 'B-H 24-04-2026'},
   { type: 'text', content: '8 33 777 88 4 0 22 444 5 0 22 2 777 .' },
   { type: 'text', content: '22 2 777 6 2 66 : 0 " 3 2 8 0 555 2 7 5 33 0 888 2 66 0 777 444 55 55 33 777 8 . 0 66 444 55 7777 0 6 33 33 0 8 33 0 6 2 55 33 66 ."' },
   { type: 'text', content: '777 444 55 55 33 777 8 ! 0 66 444 33 8 0 333 777 33 3 33 777 444 55 . 0 22 444 5 66 2 2 6 0 - - 0 55 33 66 66 33 66 0 33 555 55 2 2 777 0 3 88 7777 .' },
@@ -63,6 +65,7 @@ const PAGE_2: Line[] = [
 // ────────────────────────────────────────────────────────────
 
 const PAGE_3: Line[] = [
+  { type: 'text',  content: 'B-H 25-04-2026'}
   { type: 'text',  content: 'isldhtgi — bgki. nuub driigua, nuub lksu. olegu wuad zubtwlchsgn. Wunnumrffueds.' },
   { type: 'text',  content: 'Celui nuiparkub. rbskubdu leeui. Kubs olamlb bgus, brrgs zlkub nudllb. su neld.' },
   { type: 'text',  content: 'egus bllm Hubk du Jrbn vleeub. Dlla kblpsu gusi.' },
@@ -75,7 +78,7 @@ const PAGE_3: Line[] = [
   { type: 'spacer' },
   { type: 'text',  content: 'Kubs du bllm le. Dls gi hus vuaolbd.' },
   { type: 'text',  content: 'Zu egunub leeu dagu. nl vlblvrbd zuef kgjkub rp hus puacuue. Vrra hus drbkua. Frsr\'i mlkub.' },
-  { type: 'text',  content: 'Mllbdln du kalbs gb.' },
+  { type: 'text',  content: 'Mranub du kalbs gb.' },
 ];
 
 const PAGE_LABELS = ['Pagina 1', 'Pagina 2', 'Pagina 3'];
@@ -640,7 +643,7 @@ function NotebookContent() {
 
         .cipher-letter {
           font-family: 'Caveat', cursive, sans-serif;
-          font-size: 13px;
+          font-size: 18px;
           color: #7a6a50;
           line-height: 1;
           letter-spacing: 0;
