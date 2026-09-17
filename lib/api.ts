@@ -80,7 +80,6 @@ export interface AdminMessageDTO {
 export interface TeamDTO {
   id: number;
   name: string;
-  notebookLocation?: string | null;
   isPlaytest?: boolean;
   barName?: string | null;
 }
@@ -90,23 +89,24 @@ export interface LocationCodeDTO {
   code: string;
   locationName: string;
   unlockMessage: string;
-  characterId: number;
+  /** Map location unlocked by this code */
+  locationId: number;
 }
 
 export interface TeamProgressDTO {
   teamId: number;
   teamName: string;
-  notebookLocation: string;
   members: Array<{ id: string; email: string | null; fullName: string | null }>;
   progress: {
-    isNotebookUnlocked: boolean;
     canAccessChat: boolean;
     canSubmitTip: boolean;
     tipSubmitted: boolean;
     tipSuspectId?: string | null;
-    tipMotive?: string | null;
+    tipWeaponId?: number | null;
+    tipLocationId?: number | null;
     tipIsCorrect?: boolean | null;
   } | null;
+  unlockedCount: number;
   unlockedCodes: Array<{
     code: string | null;
     locationName: string | null;
@@ -117,15 +117,14 @@ export interface TeamProgressDTO {
 export interface TeamDetailDTO {
   teamId: number;
   teamName: string;
-  notebookLocation: string;
   members: Array<{ id: string; email: string | null; fullName: string | null }>;
   progress: {
-    isNotebookUnlocked: boolean;
     canAccessChat: boolean;
     canSubmitTip: boolean;
     tipSubmitted: boolean;
     tipSuspectId?: string | null;
-    tipMotive?: string | null;
+    tipWeaponId?: number | null;
+    tipLocationId?: number | null;
     tipIsCorrect?: boolean | null;
   } | null;
   unlockedCodes: Array<{
@@ -149,37 +148,180 @@ export interface UserInfoAdmin {
 export interface UnlockResult {
   success: boolean;
   message: string;
-  characterName?: string | null;
-  characterId?: number;
+  /** Id of the map location unlocked by this code */
+  locationId?: number;
   locationName?: string | null;
+  /** Suspect found at the unlocked location (null when none linked) */
+  characterName?: string | null;
+  characterId?: number | null;
 }
 
 export interface UnlockedCode {
   code: string;
+  locationId: number;
   locationName: string;
+  /** Suspect found at the unlocked location (null when none linked) */
   characterName?: string | null;
-  characterId: number;
+  characterId: number | null;
   unlockedAt: string;
 }
 
-export interface PasswordResponse {
-  success: boolean;
-  notebookLocation?: string;
-}
-
 export interface GameStatusResponse {
-  isUnlocked: boolean;
-  notebookLocation?: string;
   canAccessChat?: boolean;
   canSubmitTip?: boolean;
+  unlockedLocations?: number;
+  totalLocations?: number;
   isPlaytest?: boolean;
   barName?: string | null;
+  /** Intro (detective telegram) already marked as seen by the current team */
+  introSeen?: boolean;
+  /** Rules screen already marked as seen by the current team */
+  rulesSeen?: boolean;
+}
+
+/** A location row for the map page (GET /api/game/Locations) */
+export interface GameLocationDTO {
+  id: number;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  characterId: number | null;
+  characterName: string | null;
+  characterAvatarUrl: string | null;
+  isUnlocked: boolean;
+  /** '' | 'interview' | 'search_picture' */
+  contentType: string;
+  /**
+   * Parsed admin-authored content JSON for unlocked locations (interview
+   * transcript or search-picture hotspots); null when locked or when no
+   * content is configured, so nothing leaks early.
+   */
+  content: Record<string, unknown> | null;
+}
+
+/** Speluitleg content (GET /api/game/Speluitleg) */
+export interface SpeluitlegDTO {
+  title: string;
+  backstory: string;
+  rules: string;
+}
+
+/** Intro (detective telegram) / rules content (GET /api/game/Intro | /api/game/Rules) */
+export interface GameContentDTO {
+  title: string;
+  body: string;
+}
+
+/**
+ * Logigram dimension category (GET /api/game/Logigram).
+ * `key` is stable: "suspect" | "weapon" | "location".
+ */
+export interface LogigramCategoryDTO {
+  id: number;
+  key: string;
+  name: string;
+  sortOrder: number;
+}
+
+/** Logigram row within a category, e.g. "De barman" or "Dolk" */
+export interface LogigramEntryDTO {
+  id: number;
+  categoryId: number;
+  name: string;
+  imageUrl: string | null;
+  sortOrder: number;
+}
+
+/** Admin-authored hint text for the logigram */
+export interface LogigramClueDTO {
+  id: number;
+  text: string;
+  sortOrder: number;
+}
+
+/** Cell mark state: "none" | "cross" | "check" */
+export type LogigramMark = 'none' | 'cross' | 'check';
+
+/**
+ * A persisted logigram mark (GET /api/game/Logigram, PUT /api/game/Logigram/Marks):
+ * - pair mark (one grid cell): both ids set; the API normalizes the unordered
+ *   pair so entryAId = min(idA, idB) and entryBId = max(idA, idB);
+ * - per-entry mark (row/column conclusion): entryBId is null.
+ */
+export interface LogigramMarkDTO {
+  entryAId: number;
+  entryBId: number | null;
+  mark: LogigramMark;
+}
+
+/** Full logigram payload for the current team (GET /api/game/Logigram) */
+export interface LogigramDTO {
+  categories: LogigramCategoryDTO[];
+  entries: LogigramEntryDTO[];
+  clues: LogigramClueDTO[];
+  marks: LogigramMarkDTO[];
+}
+
+/** Single-row game configuration (admin, GET/PUT /api/GameSetting) */
+export interface GameSettingDTO {
+  id: number;
+  murdererCharacterId: number;
+  murderWeaponId: number;
+  murderLocationId: number;
+  speluitlegTitle: string;
+  speluitlegBackstory: string;
+  speluitlegRules: string;
+  /** Titel van de intro (detective-telegram). Leeg = ingebouwde GameDefaults-tekst. */
+  introTitle: string;
+  /** Body van de intro (detective-telegram). Leeg = ingebouwde GameDefaults-tekst. */
+  introBody: string;
+  /** Titel van het regelscherm. Leeg = ingebouwde GameDefaults-tekst. */
+  rulesTitle: string;
+  /** Body van het regelscherm. Leeg = ingebouwde GameDefaults-tekst. */
+  rulesBody: string;
+}
+
+export interface WeaponDTO {
+  id: number;
+  name: string;
+  description: string;
+  stopKeywordWeapon: string | null;
+}
+
+export interface TeamWeaponDTO {
+  id: number;
+  teamId: number;
+  weaponId: number;
+  discoveredAt: string;
+}
+
+export interface LocationDTO {
+  id: number;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  /** Verdachte op deze locatie; null = geen verdachte gekoppeld (backend stuurt dan ook null) */
+  characterId: number | null;
+  /** Inhoudstype voor het onderzoekstabblad: '' | 'interview' | 'search_picture' */
+  contentType: string;
+  /** Admin-authored content als JSON (interview-fragment of zoekfoto met hotspots) */
+  contentJson: string;
 }
 
 export interface TipResult {
   isCorrect: boolean;
   alreadySubmitted: boolean;
   suspectId?: string | null;
+}
+
+export interface AssignedLocationDTO {
+  location: string | null;
+  description: string | null;
+  characterId: number | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 // ────────────────────────────────────────────────────────────
@@ -208,14 +350,13 @@ export const authApi = {
 // ────────────────────────────────────────────────────────────
 
 export const gameApi = {
-  verifyPassword: (password: string) =>
-    fetchApi<PasswordResponse>('/api/game/VerifyPassword', {
-      method: 'POST',
-      body: JSON.stringify({ password }),
-    }),
+  /** Speluitleg content for the home page (falls back to built-in defaults) */
+  getSpeluitleg: () =>
+    fetchApi<SpeluitlegDTO>('/api/game/Speluitleg'),
 
-  getNotebookLocation: () =>
-    fetchApi<{ location: string }>('/api/game/NotebookLocation'),
+  /** All locations for the map page, with per-team unlock state */
+  getLocations: () =>
+    fetchApi<GameLocationDTO[]>('/api/game/Locations'),
 
   getGameStatus: () =>
     fetchApi<GameStatusResponse>('/api/game/Status'),
@@ -223,6 +364,37 @@ export const gameApi = {
   /** Returns only the characters unlocked by the current team via location codes */
   getUnlockedCharacters: () =>
     fetchApi<CharacterDTO[]>('/api/game/UnlockedCharacters'),
+
+  /** Returns the pre-assigned location for the current team */
+  getAssignedLocation: () =>
+    fetchApi<AssignedLocationDTO>('/api/game/AssignedLocation'),
+
+  /** Intro (detective telegram) shown after login (admin-editable) */
+  getIntro: () =>
+    fetchApi<GameContentDTO>('/api/game/Intro'),
+
+  /** Rules screen shown after the intro (admin-editable) */
+  getRules: () =>
+    fetchApi<GameContentDTO>('/api/game/Rules'),
+
+  /** Marks the intro (telegram) as seen for the current team (idempotent) */
+  markIntroSeen: () =>
+    fetchApi<{ introSeen: boolean }>('/api/game/MarkIntroSeen', { method: 'POST' }),
+
+  /** Marks the rules as seen for the current team (idempotent) */
+  markRulesSeen: () =>
+    fetchApi<{ rulesSeen: boolean }>('/api/game/MarkRulesSeen', { method: 'POST' }),
+
+  /** Logigram data: categories, entries, clues and the current team's marks */
+  getLogigram: () =>
+    fetchApi<LogigramDTO>('/api/game/Logigram'),
+
+  /** Bulk-replaces the current team's logigram marks (PUT /api/game/Logigram/Marks) */
+  saveLogigramMarks: (marks: LogigramMarkDTO[]) =>
+    fetchApi<{ saved: boolean }>('/api/game/Logigram/Marks', {
+      method: 'PUT',
+      body: JSON.stringify({ marks }),
+    }),
 };
 
 // ────────────────────────────────────────────────────────────
@@ -245,11 +417,79 @@ export const unlockApi = {
 // ────────────────────────────────────────────────────────────
 
 export const tipApi = {
-  submit: (suspectId: string, motive: string) =>
+  /** Strict Cluedo accusation: suspect + weapon + location, one-shot */
+  submit: (characterId: number, weaponId: number, locationId: number) =>
     fetchApi<TipResult>('/api/Tip/Submit', {
       method: 'POST',
-      body: JSON.stringify({ suspectId, motive }),
+      body: JSON.stringify({ characterId, weaponId, locationId }),
     }),
+};
+
+// ────────────────────────────────────────────────────────────
+// GameSettings (admin) — solution config + speluitleg texts
+// ────────────────────────────────────────────────────────────
+
+export const gameSettingApi = {
+  /** Returns the single settings row (admin only) */
+  get: async (): Promise<GameSettingDTO | null> => {
+    const rows = await fetchApi<GameSettingDTO[]>('/api/GameSetting');
+    return rows?.[0] ?? null;
+  },
+  update: (data: GameSettingDTO) =>
+    fetchApi<void>('/api/GameSetting', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+};
+
+// ────────────────────────────────────────────────────────────
+// Weapons (admin CRUD)
+// ────────────────────────────────────────────────────────────
+
+export const weaponApi = {
+  getAll: () => fetchApi<WeaponDTO[]>('/api/Weapon'),
+  getById: (id: number) => fetchApi<WeaponDTO>(`/api/Weapon/${id}`),
+  create: (data: Omit<WeaponDTO, 'id'>) =>
+    fetchApi<WeaponDTO>('/api/Weapon', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  update: (data: WeaponDTO) =>
+    fetchApi<WeaponDTO>('/api/Weapon', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: number) =>
+    fetchApi<void>(`/api/Weapon/${id}`, { method: 'DELETE' }),
+};
+
+// ────────────────────────────────────────────────────────────
+// Locations (admin CRUD + CSV upload)
+// ────────────────────────────────────────────────────────────
+
+export const locationApi = {
+  getAll: () => fetchApi<LocationDTO[]>('/api/Location'),
+  getById: (id: number) => fetchApi<LocationDTO>(`/api/Location/${id}`),
+  create: (data: Omit<LocationDTO, 'id'>) =>
+    fetchApi<LocationDTO>('/api/Location', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  update: (data: LocationDTO) =>
+    fetchApi<LocationDTO>('/api/Location', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: number) =>
+    fetchApi<void>(`/api/Location/${id}`, { method: 'DELETE' }),
+  uploadCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetchApi<{ count: number; message: string }>('/api/Tip/UploadLocations', {
+      method: 'POST',
+      body: formData,
+    });
+  },
 };
 
 // ────────────────────────────────────────────────────────────
@@ -452,6 +692,110 @@ export const locationCodeApi = {
 };
 
 // ────────────────────────────────────────────────────────────
+// Logigram (admin CRUD) — categories, entries and clues
+// ────────────────────────────────────────────────────────────
+
+/** Admin CRUD shape of a logigram category (GET/POST/PUT /api/LogigramCategory) */
+export interface LogigramCategoryAdminDTO {
+  id: number;
+  /** Stable key: "suspect" | "weapon" | "location" — the player grids key off these */
+  key: string;
+  name: string;
+  sortOrder: number;
+}
+
+/** Admin CRUD shape of a logigram entry (GET/POST/PUT /api/LogigramEntry) */
+export interface LogigramEntryAdminDTO {
+  id: number;
+  logigramCategoryId: number;
+  name: string;
+  imageUrl: string | null;
+  sortOrder: number;
+  /**
+   * Source entity id when the entry was auto-synced from the game content
+   * (character/weapon/location id — the category key determines which);
+   * null for legacy/manual entries (removed by the next sync).
+   */
+  entityId: number | null;
+}
+
+/** Admin CRUD shape of a logigram clue (GET/POST/PUT /api/LogigramClue) */
+export interface LogigramClueAdminDTO {
+  id: number;
+  text: string;
+  sortOrder: number;
+}
+
+export const logigramCategoryApi = {
+  getAll: () => fetchApi<LogigramCategoryAdminDTO[]>('/api/LogigramCategory'),
+  getById: (id: number) => fetchApi<LogigramCategoryAdminDTO>(`/api/LogigramCategory/${id}`),
+  create: (data: Omit<LogigramCategoryAdminDTO, 'id'>) =>
+    fetchApi<LogigramCategoryAdminDTO>('/api/LogigramCategory', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  update: (data: LogigramCategoryAdminDTO) =>
+    fetchApi<LogigramCategoryAdminDTO>('/api/LogigramCategory', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: number) =>
+    fetchApi<void>(`/api/LogigramCategory/${id}`, { method: 'DELETE' }),
+};
+
+export const logigramEntryApi = {
+  getAll: () => fetchApi<LogigramEntryAdminDTO[]>('/api/LogigramEntry'),
+  getById: (id: number) => fetchApi<LogigramEntryAdminDTO>(`/api/LogigramEntry/${id}`),
+  create: (data: Omit<LogigramEntryAdminDTO, 'id'>) =>
+    fetchApi<LogigramEntryAdminDTO>('/api/LogigramEntry', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  update: (data: LogigramEntryAdminDTO) =>
+    fetchApi<LogigramEntryAdminDTO>('/api/LogigramEntry', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: number) =>
+    fetchApi<void>(`/api/LogigramEntry/${id}`, { method: 'DELETE' }),
+};
+
+export const logigramClueApi = {
+  getAll: () => fetchApi<LogigramClueAdminDTO[]>('/api/LogigramClue'),
+  getById: (id: number) => fetchApi<LogigramClueAdminDTO>(`/api/LogigramClue/${id}`),
+  create: (data: Omit<LogigramClueAdminDTO, 'id'>) =>
+    fetchApi<LogigramClueAdminDTO>('/api/LogigramClue', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  update: (data: LogigramClueAdminDTO) =>
+    fetchApi<LogigramClueAdminDTO>('/api/LogigramClue', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: number) =>
+    fetchApi<void>(`/api/LogigramClue/${id}`, { method: 'DELETE' }),
+};
+
+/** Result of POST /api/Admin/Logigram/Sync */
+export interface LogigramSyncResultDTO {
+  /** New entries created from game content */
+  created: number;
+  /** Entries whose name/image/order changed */
+  updated: number;
+  /** Entries removed (stale manual entries or deleted source entities) */
+  deleted: number;
+  /** Legacy manual entries adopted because their name matched a source entity */
+  adopted: number;
+}
+
+export const logigramSyncApi = {
+  /** Rebuilds the logigram grid from characters (suspects), weapons and locations */
+  sync: () =>
+    fetchApi<LogigramSyncResultDTO>('/api/Admin/Logigram/Sync', { method: 'POST' }),
+};
+
+// ────────────────────────────────────────────────────────────
 // Admin
 // ────────────────────────────────────────────────────────────
 
@@ -471,10 +815,16 @@ export const adminApi = {
     fetchApi<TeamProgressDTO[]>('/api/Admin/TeamProgress'),
   getTeamDetail: (teamId: number) =>
     fetchApi<TeamDetailDTO>(`/api/Admin/TeamDetail/${teamId}`),
-  setProgress: (teamId: number, flags: { isNotebookUnlocked?: boolean; canAccessChat?: boolean; canSubmitTip?: boolean }) =>
+  setProgress: (teamId: number, flags: { canAccessChat?: boolean; canSubmitTip?: boolean; locationId?: number | null; weaponId?: number | null }) =>
     fetchApi<void>('/api/Admin/SetProgress', {
       method: 'POST',
       body: JSON.stringify({ teamId, ...flags }),
+    }),
+
+  assignLocation: (teamId: number, locationId: number) =>
+    fetchApi<void>('/api/Admin/AssignLocation', {
+      method: 'POST',
+      body: JSON.stringify({ teamId, locationId }),
     }),
   setPlaytest: (teamId: number, isPlaytest: boolean) =>
     fetchApi<void>('/api/Team', {

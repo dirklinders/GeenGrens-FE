@@ -68,7 +68,7 @@ function LoginForm() {
             </svg>
           </div>
           <CardTitle className="font-serif text-2xl text-stone-100">
-            GeenGrens
+            Muntonrecht
           </CardTitle>
           <CardDescription className="text-stone-400">
             Log in om het mysterie te ontrafelen

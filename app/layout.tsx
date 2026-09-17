@@ -21,7 +21,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: 'GeenGrens - Murder Mystery',
+  title: 'Muntonrecht - Murder Mystery',
   description: 'Ontdek de waarheid achter de mysterieuze dood van Viktor Vermeer',
 }
 

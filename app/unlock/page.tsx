@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { unlockApi, type UnlockedCode } from '@/lib/api';
+import { FEATURE_CHAT_ENABLED } from '@/lib/feature-flags';
 
 function UnlockContent() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState<{ characterName: string | null | undefined; message: string } | null>(null);
+  const [success, setSuccess] = useState<{ locationName: string | null | undefined; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -34,7 +35,7 @@ function UnlockContent() {
       const result = await unlockApi.enterCode(code.toUpperCase().trim());
 
       if (result.success) {
-        setSuccess({ characterName: result.characterName, message: result.message });
+        setSuccess({ locationName: result.locationName, message: result.message });
         setCode('');
         mutateUnlocked(); // refresh unlocked list
       } else {
@@ -89,18 +90,20 @@ function UnlockContent() {
 
               {success && (
                 <div className="bg-emerald-950 border border-emerald-800 text-emerald-400 px-4 py-3 rounded space-y-2">
-                  <p className="font-medium">Nieuwe getuige ontgrendeld!</p>
-                  {success.characterName && (
-                    <p className="text-sm font-medium text-emerald-300">{success.characterName}</p>
+                  <p className="font-medium">Nieuwe locatie ontgrendeld!</p>
+                  {success.locationName && (
+                    <p className="text-sm font-medium text-emerald-300">{success.locationName}</p>
                   )}
                   <p className="text-sm">{success.message}</p>
                   <Button
-                    onClick={() => router.push('/chat')}
+                    onClick={() =>
+                      router.push(FEATURE_CHAT_ENABLED ? '/chat' : '/game?tab=kaart')
+                    }
                     variant="outline"
                     size="sm"
                     className="mt-2 border-emerald-700 text-emerald-400 hover:bg-emerald-900"
                   >
-                    Ga naar onderzoek
+                    Naar de kaart
                   </Button>
                 </div>
               )}
@@ -108,12 +111,12 @@ function UnlockContent() {
           </CardContent>
         </Card>
 
-        {/* Unlocked characters */}
+        {/* Unlocked locations */}
         {!isLoading && unlockedCodes && unlockedCodes.length > 0 && (
           <Card className="bg-stone-900 border-stone-800 mt-6">
             <CardHeader>
               <CardTitle className="font-serif text-xl text-stone-100">
-                Ontgrendelde Getuigen
+                Ontgrendelde Locaties
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -125,9 +128,13 @@ function UnlockContent() {
                   >
                     <div className="min-w-0">
                       <span className="text-stone-100 block truncate">
-                        {unlock.characterName ?? unlock.locationName}
+                        {unlock.locationName}
                       </span>
-                      <span className="text-stone-500 text-xs truncate block">{unlock.locationName}</span>
+                      {unlock.characterName && (
+                        <span className="text-stone-500 text-xs truncate block">
+                          Verdachte: {unlock.characterName}
+                        </span>
+                      )}
                     </div>
                     <span className="text-stone-500 text-xs font-mono flex-shrink-0">{unlock.code}</span>
                   </li>
@@ -143,10 +150,10 @@ function UnlockContent() {
             <h3 className="text-stone-300 font-medium mb-2">Hoe werkt het?</h3>
             <ol className="text-stone-500 text-sm space-y-2 list-decimal list-inside">
               <li>Zoek naar aanwijzingen in het notitieboekje van Viktor</li>
-              <li>De aanwijzingen leiden je naar fysieke locaties in Baarle-Nassau</li>
+              <li>De aanwijzingen leiden je naar fysieke locaties in Zutphen</li>
               <li>Op elke locatie vind je een code</li>
-              <li>Voer de code hier in om een nieuwe getuige te ontgrendelen</li>
-              <li>Ondervraag de getuige voor meer informatie</li>
+              <li>Voer de code hier in om die locatie op de kaart te ontgrendelen</li>
+              <li>Onderzoek de locatie voor meer informatie</li>
             </ol>
           </CardContent>
         </Card>

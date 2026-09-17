@@ -7,10 +7,11 @@ import { AuthGuard } from '@/components/game/auth-guard';
 import { ChatMessage } from '@/components/game/chat-message';
 import { CharacterSelector } from '@/components/game/character-selector';
 import { GameHeader } from '@/components/game/game-header';
-import { gameApi, chatFeApi, unlockApi, type CharacterDTO, type ChatDTO } from '@/lib/api';
+import { gameApi, chatFeApi, unlockApi, type CharacterDTO, type ChatDTO, type UnlockedCode } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FEATURE_CHAT_ENABLED } from '@/lib/feature-flags';
 
 interface LocalMessage {
   id: number;
@@ -113,11 +114,16 @@ function ChatContent() {
   }, [unlockedCodes]);
 
   // All characters except the latest are locked (read-only)
+  // characterId is nullable (a location can lack a linked suspect) — such
+  // unlocks cannot lock any chat, so they are filtered out.
   const lockedCharacterIds = useMemo(() => {
     if (!unlockedCodes || unlockedCodes.length <= 1) return new Set<number>();
     return new Set(
       unlockedCodes
-        .filter(uc => uc.characterId !== latestUnlockedCharacterId)
+        .filter(
+          (uc): uc is UnlockedCode & { characterId: number } =>
+            uc.characterId !== null && uc.characterId !== latestUnlockedCharacterId
+        )
         .map(uc => uc.characterId)
     );
   }, [unlockedCodes, latestUnlockedCharacterId]);
@@ -148,7 +154,7 @@ function ChatContent() {
   const selectedCharacter = charactersList.find(c => c.id === selectedCharacterId);
 
   // Sync chat history to local state; detect persisted ended-state marker
-  const chatHistoryRef = useRef<ChatDTO[] | undefined>();
+  const chatHistoryRef = useRef<ChatDTO[] | undefined>(undefined);
   useEffect(() => {
     if (chatHistory && chatHistory !== chatHistoryRef.current) {
       chatHistoryRef.current = chatHistory;
@@ -419,6 +425,24 @@ function ChatContent() {
   );
 }
 
+/**
+ * Feature-flag gate. With FEATURE_CHAT_ENABLED=false the chat page is
+ * unreachable and players are redirected to the game shell; the full chat
+ * implementation in ChatContent below stays intact so a single flag flip
+ * restores the previous behaviour.
+ */
+function ChatGate() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!FEATURE_CHAT_ENABLED) router.replace('/game');
+  }, [router]);
+
+  if (!FEATURE_CHAT_ENABLED) return null;
+
+  return <ChatContent />;
+}
+
 export default function ChatPage() {
   return (
     <AuthGuard>
@@ -427,7 +451,7 @@ export default function ChatPage() {
           <div className="animate-pulse text-stone-400 font-serif text-lg">Laden...</div>
         </div>
       }>
-        <ChatContent />
+        <ChatGate />
       </Suspense>
     </AuthGuard>
   );

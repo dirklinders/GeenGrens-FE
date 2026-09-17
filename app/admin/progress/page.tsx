@@ -6,6 +6,8 @@ import useSWR from 'swr';
 import { adminApi, type TeamProgressDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 // ────────────────────────────────────────────────────────────
 // Badges
@@ -32,18 +34,20 @@ function OverridePanel({ teamId, current, onClose, onUpdate }: {
   onClose: () => void;
   onUpdate: () => void;
 }) {
-  const [notebook, setNotebook] = useState(current?.isNotebookUnlocked ?? false);
   const [chat, setChat] = useState(current?.canAccessChat ?? false);
   const [tip, setTip] = useState(current?.canSubmitTip ?? false);
+  const [locationId, setLocationId] = useState<string>('');
+  const [weaponId, setWeaponId] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
     setSaving(true);
     try {
       await adminApi.setProgress(teamId, {
-        isNotebookUnlocked: notebook,
         canAccessChat: chat,
         canSubmitTip: tip,
+        locationId: locationId ? Number(locationId) : null,
+        weaponId: weaponId ? Number(weaponId) : null,
       });
       onUpdate();
       onClose();
@@ -59,16 +63,6 @@ function OverridePanel({ teamId, current, onClose, onUpdate }: {
   return (
     <div className="mt-4 bg-stone-800 rounded p-4 space-y-3 border border-stone-700">
       <p className="text-stone-300 text-sm font-medium">Voortgang handmatig aanpassen</p>
-
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={notebook}
-          onChange={(e) => setNotebook(e.target.checked)}
-          className="accent-red-700 w-4 h-4"
-        />
-        <span className="text-stone-300 text-sm">Notitieboek ontgrendeld</span>
-      </label>
 
       <label className="flex items-center gap-3 cursor-pointer">
         <input
@@ -89,6 +83,30 @@ function OverridePanel({ teamId, current, onClose, onUpdate }: {
         />
         <span className="text-stone-300 text-sm">Anonieme melding toegankelijk</span>
       </label>
+
+      {/* Pre-assigned location */}
+      <div className="space-y-1">
+        <Label className="text-stone-300 text-sm">Vooraf toegewezen locatie ID</Label>
+        <Input
+          type="number"
+          value={locationId}
+          onChange={(e) => setLocationId(e.target.value)}
+          placeholder="Locatie ID"
+          className="bg-stone-900 border-stone-700 text-stone-100"
+        />
+      </div>
+
+      {/* Discovered weapon */}
+      <div className="space-y-1">
+        <Label className="text-stone-300 text-sm">Wapen ID (ontdekt door team)</Label>
+        <Input
+          type="number"
+          value={weaponId}
+          onChange={(e) => setWeaponId(e.target.value)}
+          placeholder="Wapen ID"
+          className="bg-stone-900 border-stone-700 text-stone-100"
+        />
+      </div>
 
       <div className="flex gap-2 pt-2">
         <Button onClick={save} disabled={saving} size="sm" className="bg-red-800 hover:bg-red-700 text-stone-100">
@@ -117,8 +135,8 @@ function TeamCard({ team, onUpdate }: { team: TeamProgressDTO; onUpdate: () => v
           <div>
             <CardTitle className="text-stone-100 text-lg font-serif">{team.teamName}</CardTitle>
             <p className="text-stone-500 text-xs mt-0.5">
-              Notitieboek:{' '}
-              <span className="font-mono text-stone-400">{team.notebookLocation}</span>
+              Locaties ontgrendeld:{' '}
+              <span className="font-mono text-stone-400">{team.unlockedCount ?? team.unlockedCodes.length}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -142,9 +160,8 @@ function TeamCard({ team, onUpdate }: { team: TeamProgressDTO; onUpdate: () => v
         {/* Status badges */}
         {p ? (
           <div className="flex flex-wrap gap-2">
-            <StatusBadge value={p.isNotebookUnlocked} label="Notitieboek" />
             <StatusBadge value={p.canAccessChat} label="Ondervragingen" />
-            <StatusBadge value={p.canSubmitTip} label="Melding mogelijk" />
+            <StatusBadge value={p.canSubmitTip} label="Aanklacht mogelijk" />
             {p.tipSubmitted && (
               <StatusBadge
                 value={p.tipIsCorrect ?? false}
@@ -159,15 +176,14 @@ function TeamCard({ team, onUpdate }: { team: TeamProgressDTO; onUpdate: () => v
         {/* Tip details */}
         {p?.tipSubmitted && (
           <div className="bg-stone-800 rounded p-3 space-y-1">
-            <p className="text-stone-400 text-xs font-medium uppercase tracking-wide">Ingediende melding</p>
+            <p className="text-stone-400 text-xs font-medium uppercase tracking-wide">Ingediende aanklacht</p>
             <p className="text-stone-300 text-sm">
               Verdachte: <span className="text-stone-100">{p.tipSuspectId ?? '—'}</span>
+              {' · '}
+              Wapen: <span className="text-stone-100">{p.tipWeaponId ?? '—'}</span>
+              {' · '}
+              Locatie: <span className="text-stone-100">{p.tipLocationId ?? '—'}</span>
             </p>
-            {p.tipMotive && (
-              <p className="text-stone-400 text-xs mt-1 leading-relaxed">
-                &ldquo;{p.tipMotive}&rdquo;
-              </p>
-            )}
           </div>
         )}
 

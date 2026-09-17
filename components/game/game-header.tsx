@@ -5,6 +5,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { useAuth } from '@/lib/auth-context';
 import { gameApi } from '@/lib/api';
+import { FEATURE_CHAT_ENABLED } from '@/lib/feature-flags';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -33,15 +34,22 @@ export function GameHeader({
 
   const canAccessChat = gameStatus?.canAccessChat ?? false;
   const canSubmitTip  = gameStatus?.canSubmitTip  ?? false;
-  const isPlaytest    = gameStatus?.isPlaytest    ?? false;
-  const isUnlocked    = gameStatus?.isUnlocked    ?? false;
 
-  // Nav links shared between desktop inline and mobile sheet
+  // Nav links shared between desktop inline and mobile sheet.
+  // The three game tabs (Kaart / Logigram / Onderzoek) live in the /game shell;
+  // "Speluitleg" (/rules) is always listed — the rules may be revisited at any
+  // time, even after the onboarding flow has been completed;
+  // the AI-chat entry ("Gesprek") is hidden behind the feature flag — the chat
+  // code itself stays intact and returns with a single flag flip.
   const navItems = [
-    isPlaytest && isUnlocked ? { href: '/notebook', label: '📓 Notitieboek', accent: 'amber' } : null,
-    canAccessChat            ? { href: '/chat',     label: 'Onderzoek',       accent: 'stone' } : null,
-    canSubmitTip             ? { href: '/tip',      label: 'Meld dader',      accent: 'stone' } : null,
-    user?.isAdmin            ? { href: '/admin',    label: 'Admin',           accent: 'red'   } : null,
+    { href: '/game',               label: 'Spel',      accent: 'amber' },
+    { href: '/game?tab=kaart',     label: 'Kaart',     accent: 'stone' },
+    { href: '/game?tab=logigram',  label: 'Logigram',  accent: 'stone' },
+    { href: '/game?tab=onderzoek', label: 'Onderzoek', accent: 'stone' },
+    { href: '/rules',              label: 'Speluitleg', accent: 'stone' },
+    FEATURE_CHAT_ENABLED && canAccessChat ? { href: '/chat', label: 'Gesprek', accent: 'stone' } : null,
+    canSubmitTip ? { href: '/tip', label: 'Meld dader', accent: 'stone' } : null,
+    user?.isAdmin ? { href: '/admin', label: 'Admin', accent: 'red' } : null,
   ].filter(Boolean) as { href: string; label: string; accent: string }[];
 
   const accentClass = (accent: string) =>
@@ -83,15 +91,15 @@ export function GameHeader({
           )}
 
           <Link href="/" className="font-serif text-lg sm:text-xl text-stone-100 truncate">
-            GeenGrens
+            Muntonrecht
           </Link>
         </div>
 
         {/* RIGHT: desktop nav + mobile nav hamburger */}
         <div className="flex items-center gap-1">
-          {/* Desktop nav (hidden on mobile) */}
+          {/* Desktop nav (hidden below lg — the nav is wider now with the three tabs) */}
           {navItems.length > 0 && (
-            <nav className="hidden md:flex items-center gap-5 mr-2">
+            <nav className="hidden lg:flex items-center gap-5 mr-2">
               {navItems.map(item => (
                 <Link
                   key={item.href}
@@ -111,7 +119,7 @@ export function GameHeader({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden text-stone-400 flex-shrink-0 h-9 w-9"
+                  className="lg:hidden text-stone-400 flex-shrink-0 h-9 w-9"
                   aria-label="Menu"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

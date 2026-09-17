@@ -23,7 +23,6 @@ function TeamForm({
   onCancel: () => void;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [notebookLocation, setNotebookLocation] = useState(initial?.notebookLocation ?? '');
   const [barName, setBarName] = useState(initial?.barName ?? '');
   const [saving, setSaving] = useState(false);
 
@@ -31,7 +30,7 @@ function TeamForm({
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave({ id: initial?.id, name, notebookLocation: notebookLocation || null, barName: barName || null });
+      await onSave({ id: initial?.id, name, barName: barName || null });
     } finally {
       setSaving(false);
     }
@@ -51,20 +50,8 @@ function TeamForm({
       </div>
       <div className="space-y-1">
         <Label className="text-stone-300 text-sm">
-          Locatie notitieboek{' '}
-          <span className="text-stone-500 font-normal">(leeg = "Onder de trap")</span>
-        </Label>
-        <Input
-          value={notebookLocation}
-          onChange={(e) => setNotebookLocation(e.target.value)}
-          placeholder="bijv. Achter de bar"
-          className="bg-stone-800 border-stone-700 text-stone-100"
-        />
-      </div>
-      <div className="space-y-1">
-        <Label className="text-stone-300 text-sm">
           Naam van de bar{' '}
-          <span className="text-stone-500 font-normal">(vervangt {'{BarNaam}'} in systeem-prompts en notitieboek)</span>
+          <span className="text-stone-500 font-normal">(vervangt {'{BarNaam}'} in systeem-prompts)</span>
         </Label>
         <Input
           value={barName}
@@ -278,12 +265,6 @@ export default function TeamsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-stone-500 text-sm mt-0.5">
-                        Notitieboek:{' '}
-                        <span className="text-stone-400 font-mono text-xs">
-                          {team.notebookLocation ?? 'Onder de trap (standaard)'}
-                        </span>
-                      </p>
                       {team.barName && (
                         <p className="text-stone-500 text-sm mt-0.5">
                           Bar:{' '}
@@ -296,7 +277,7 @@ export default function TeamsPage() {
                       <button
                         onClick={() => handleTogglePlaytest(team)}
                         disabled={togglingPlaytest === team.id}
-                        title={team.isPlaytest ? 'Playtest uitschakelen' : 'Playtest inschakelen — geeft toegang tot digitaal notitieboek'}
+                        title={team.isPlaytest ? 'Playtest uitschakelen' : 'Playtest inschakelen'}
                         className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
                           team.isPlaytest
                             ? 'bg-amber-900/40 border-amber-700 text-amber-400 hover:bg-amber-900/60'

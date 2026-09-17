@@ -147,3 +147,113 @@ html, body {
 .animate-shake {
   animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
+
+/* ────────────────────────────────────────────────────────────
+   Noir styling for the Leaflet investigation map
+   ──────────────────────────────────────────────────────────── */
+
+/* Desaturate OSM tiles to match the stone/amber theme */
+.munton-map .leaflet-tile {
+  filter: grayscale(1) sepia(0.3) brightness(0.8) contrast(1.05);
+}
+
+.munton-map .leaflet-control-attribution {
+  background: rgba(28, 25, 23, 0.8);
+  color: #a8a29e;
+}
+.munton-map .leaflet-control-attribution a {
+  color: #d6d3d1;
+}
+
+.munton-map .leaflet-bar a {
+  background: #1c1917;
+  color: #d6d3d1;
+  border-color: #44403c;
+}
+
+/* Map pins (divIcon content) */
+.map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  border: 2px solid;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.map-pin-locked {
+  background: #44403c;
+  border-color: #78716c;
+  opacity: 0.9;
+}
+
+.map-pin-unlocked {
+  background: #b45309;
+  border-color: #fbbf24;
+}
+
+/* Dark popups */
+.munton-map .leaflet-popup-content-wrapper,
+.munton-map .leaflet-popup-tip {
+  background: #1c1917;
+  color: #e7e5e4;
+  border: 1px solid #44403c;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.munton-map .leaflet-popup-content {
+  margin: 12px 16px;
+  font-family: var(--font-serif, Georgia, serif);
+}
+
+.map-popup {
+  min-width: 180px;
+}
+
+.map-popup-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f5f5f4;
+  margin-bottom: 4px;
+}
+
+.map-popup-character {
+  font-size: 0.85rem;
+  color: #d6d3d1;
+  margin-bottom: 4px;
+}
+
+.map-popup-desc {
+  font-size: 0.8rem;
+  color: #a8a29e;
+  margin-bottom: 8px;
+}
+
+.map-popup-cta {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.map-popup-cta-unlocked {
+  background: #b45309;
+  color: #1c1917;
+}
+.map-popup-cta-unlocked:hover {
+  background: #d97706;
+}
+
+.map-popup-cta-locked {
+  background: #292524;
+  color: #d6d3d1;
+  border: 1px solid #57534e;
+}
+.map-popup-cta-locked:hover {
+  background: #3b3835;
+}

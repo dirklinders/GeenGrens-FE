@@ -9,7 +9,10 @@ const NAV_ITEMS = [
   { href: '/admin/teams', label: 'Teams' },
   { href: '/admin/gebruikers', label: 'Gebruikers' },
   { href: '/admin/characters', label: 'Verdachten' },
-  { href: '/admin/locations', label: 'Locatiecodes' },
+  { href: '/admin/locations', label: 'Locaties' },
+  { href: '/admin/weapons', label: 'Wapens' },
+  { href: '/admin/logigram', label: 'Logigram' },
+  { href: '/admin/settings', label: 'Instellingen' },
   { href: '/admin/progress', label: 'Voortgang' },
 ];
 

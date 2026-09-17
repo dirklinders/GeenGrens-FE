@@ -226,8 +226,8 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
           </Link>
           <h1 className="font-serif text-2xl text-stone-100 mt-1">{team.teamName}</h1>
           <p className="text-stone-500 text-sm mt-0.5">
-            Notitieboek:{' '}
-            <span className="font-mono text-stone-400">{team.notebookLocation}</span>
+            Locaties ontgrendeld:{' '}
+            <span className="font-mono text-stone-400">{team.unlockedCodes.length}</span>
           </p>
         </div>
 
@@ -247,9 +247,8 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
       {/* ── Status badges ── */}
       {p ? (
         <div className="flex flex-wrap gap-2">
-          <StatusBadge value={p.isNotebookUnlocked} label="Notitieboek" />
           <StatusBadge value={p.canAccessChat}      label="Ondervragingen" />
-          <StatusBadge value={p.canSubmitTip}       label="Melding mogelijk" />
+          <StatusBadge value={p.canSubmitTip}       label="Aanklacht mogelijk" />
           {p.tipSubmitted && (
             <StatusBadge
               value={p.tipIsCorrect ?? false}
@@ -264,15 +263,14 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
       {/* ── Submitted tip ── */}
       {p?.tipSubmitted && (
         <div className="bg-stone-900 border border-stone-800 rounded p-4 space-y-1">
-          <p className="text-stone-400 text-xs font-medium uppercase tracking-wide">Ingediende melding</p>
+          <p className="text-stone-400 text-xs font-medium uppercase tracking-wide">Ingediende aanklacht</p>
           <p className="text-stone-300 text-sm">
             Verdachte: <span className="text-stone-100">{p.tipSuspectId ?? '—'}</span>
+            {' · '}
+            Wapen: <span className="text-stone-100">{p.tipWeaponId ?? '—'}</span>
+            {' · '}
+            Locatie: <span className="text-stone-100">{p.tipLocationId ?? '—'}</span>
           </p>
-          {p.tipMotive && (
-            <p className="text-stone-400 text-xs leading-relaxed mt-1">
-              &ldquo;{p.tipMotive}&rdquo;
-            </p>
-          )}
         </div>
       )}
 

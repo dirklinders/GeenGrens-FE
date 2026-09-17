@@ -14,12 +14,12 @@ export function NewspaperHeadline() {
       {/* Newspaper header */}
       <header className="border-b-4 border-double border-stone-800 pb-4 mb-6 relative">
         <div className="flex justify-between items-center text-xs text-stone-600 mb-2">
-          <span>Baarle Courant</span>
+          <span>Muntonrecht Courant</span>
           <span>Vrijdag 24 April 2026</span>
           <span>Jaargang 142, Nr. 67</span>
         </div>
         <h1 className="font-serif text-4xl md:text-5xl font-bold text-center tracking-tight">
-          DE BAARLE COURANT
+          DE MUNTONRECHT COURANT
         </h1>
         <div className="text-center text-xs text-stone-600 mt-2 italic">
           &quot;De stem van de grensstreek sinds 1884&quot;
@@ -105,7 +105,7 @@ export function NewspaperHeadline() {
         <div className="grid md:grid-cols-2 gap-6 text-sm leading-relaxed text-stone-800 border-t border-stone-300 pt-6">
           <div className="space-y-4">
             <p className="first-letter:text-4xl first-letter:font-serif first-letter:font-bold first-letter:float-left first-letter:mr-2 first-letter:mt-1">
-              Journalist en onderzoeker Viktor Vermeer (58) is gisterenavond overleden in zijn woning aan de Singel in Baarle-Nassau. De politie werd rond 21:30 uur gealarmeerd door een buurman die zich zorgen maakte omdat hij enkele dagen geen contact met Vermeer had.
+              Journalist en onderzoeker Viktor Vermeer (58) is gisterenavond overleden in zijn woning aan de Singel in Zutphen. De politie werd rond 21:30 uur gealarmeerd door een buurman die zich zorgen maakte omdat hij enkele dagen geen contact met Vermeer had.
             </p>
             <p>
               Vermeer stond bekend om zijn werk als onderzoeker en zijn interesse in historische onderwerpen, met name de geschiedenis van grensgebieden tussen Nederland en België. Gedurende zijn carrière werkte hij samen met diverse historici en onderzoekers.

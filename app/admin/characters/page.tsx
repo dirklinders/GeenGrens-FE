@@ -180,7 +180,7 @@ function CharacterForm({
           <Textarea
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
-            placeholder={`Je bent [naam], een personage in een murder mystery spel in Baarle-Nassau.\n\nJe bent [beschrijving]. Je praat [stijl].\n\nJe weet het volgende over de zaak:\n- ...\n\nJe verbergt het volgende:\n- ...\n\nAntwoord altijd in het Nederlands. Blijf in karakter.`}
+            placeholder={`Je bent [naam], een personage in een murder mystery spel in Zutphen.\n\nJe bent [beschrijving]. Je praat [stijl].\n\nJe weet het volgende over de zaak:\n- ...\n\nJe verbergt het volgende:\n- ...\n\nAntwoord altijd in het Nederlands. Blijf in karakter.`}
             required
             className="bg-stone-800 border-stone-700 text-stone-100 font-mono text-sm min-h-72 resize-y"
           />
@@ -256,7 +256,7 @@ function AdminTestChat({ character }: { character: CharacterDTO }) {
     // Snapshot history for request (before adding user msg to state)
     const historyForRequest: AdminMessageDTO[] = history
       .filter(m => m.role !== 'System')
-      .map(m => ({ role: m.role, content: m.content }));
+      .map(m => ({ role: m.role as 'User' | 'Assistant', content: m.content }));
 
     const sendingClose = simulateClose;
 
