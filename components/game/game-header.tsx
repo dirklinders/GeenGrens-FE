@@ -29,7 +29,7 @@ export function GameHeader({
   const { data: gameStatus } = useSWR(
     'game-status-header',
     () => gameApi.getGameStatus(),
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: true }
   );
 
   const canAccessChat = gameStatus?.canAccessChat ?? false;
@@ -37,8 +37,7 @@ export function GameHeader({
 
   // Nav links shared between desktop inline and mobile sheet.
   // The three game tabs (Kaart / Logigram / Onderzoek) live in the /game shell;
-  // "Speluitleg" (/rules) is always listed — the rules may be revisited at any
-  // time, even after the onboarding flow has been completed;
+  // "Speluitleg" links to the homepage, where the rules live;
   // the AI-chat entry ("Gesprek") is hidden behind the feature flag — the chat
   // code itself stays intact and returns with a single flag flip.
   const navItems = [
@@ -46,7 +45,7 @@ export function GameHeader({
     { href: '/game?tab=kaart',     label: 'Kaart',     accent: 'stone' },
     { href: '/game?tab=logigram',  label: 'Logigram',  accent: 'stone' },
     { href: '/game?tab=onderzoek', label: 'Onderzoek', accent: 'stone' },
-    { href: '/rules',              label: 'Speluitleg', accent: 'stone' },
+    { href: '/',                   label: 'Speluitleg', accent: 'stone' },
     FEATURE_CHAT_ENABLED && canAccessChat ? { href: '/chat', label: 'Gesprek', accent: 'stone' } : null,
     canSubmitTip ? { href: '/tip', label: 'Meld dader', accent: 'stone' } : null,
     user?.isAdmin ? { href: '/admin', label: 'Admin', accent: 'red' } : null,

@@ -2,7 +2,7 @@
 
 /**
  * Shared "aged paper" sheet used by the intro (telegram) and rules screens.
- * Same paper cut-out aesthetic as the newspaper headline: amber-50 paper,
+ * Same paper cut-out aesthetic as the newspaper headline: yellowed paper,
  * grain texture overlay and an inner dashed frame.
  */
 export function PaperSheet({
@@ -14,7 +14,11 @@ export function PaperSheet({
 }) {
   return (
     <div
-      className={`relative bg-amber-50 text-stone-900 shadow-2xl overflow-hidden ${className}`}
+      className={`relative bg-[#e8d5a5] text-stone-900 shadow-2xl overflow-hidden ${className}`}
+      style={{
+        backgroundImage: 'radial-gradient(ellipse at 5% 10%, rgba(120, 74, 25, 0.18), transparent 45%), radial-gradient(ellipse at 95% 90%, rgba(120, 74, 25, 0.22), transparent 40%), linear-gradient(100deg, transparent 48%, rgba(120, 74, 25, 0.07) 50%, transparent 52%)',
+        boxShadow: 'inset 0 0 45px rgba(120, 74, 25, 0.18), 0 20px 40px rgba(0, 0, 0, 0.4)',
+      }}
     >
       {/* Paper grain */}
       <div

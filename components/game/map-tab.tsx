@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { gameApi } from '@/lib/api';
-import { FEATURE_CHAT_ENABLED } from '@/lib/feature-flags';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
@@ -19,12 +18,11 @@ const LocationMap = dynamic(() => import('@/components/game/location-map'), {
 });
 
 /**
- * "Kaart" tab of the game shell: the Leaflet map plus the tappable location
+ * "Kaart" tab of the game shell: the Leaflet map plus the location status
  * list. Shared by `/game` (tab) and `/map` (legacy page, chat-enabled mode).
  *
- * Chat flag: with FEATURE_CHAT_ENABLED=true unlocked locations link to
- * `/chat?character=` (old behaviour); with the flag false they link to the
- * location's dossier in the Onderzoek tab.
+ * Location rows show only their name and lock state; dossiers open through
+ * the map popup or the Onderzoek tab.
  */
 export function MapTab() {
   const { data: locations, isLoading } = useSWR(
@@ -36,7 +34,7 @@ export function MapTab() {
   const { data: status } = useSWR(
     'game-status-map',
     () => gameApi.getGameStatus(),
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: true }
   );
 
   if (isLoading || !locations) {
@@ -49,7 +47,7 @@ export function MapTab() {
 
   const unlocked = locations.filter(l => l.isUnlocked).length;
   const total = locations.length;
-  const canSubmitTip = status?.canSubmitTip ?? false;
+  const canSubmitTip = !!status?.canSubmitTip && total > 0 && unlocked === total;
 
   return (
     <div className="space-y-6">
@@ -58,21 +56,19 @@ export function MapTab() {
         <div className="flex items-center justify-between">
           <h1 className="font-serif text-2xl text-stone-100">Onderzoekskaart</h1>
           <span className="text-amber-600 font-serif text-sm">
-            {unlocked} / {total} locaties ontgrendeld
+            {status?.unlockedLocations ?? 0} / {total} locaties bezocht
           </span>
         </div>
-        <Progress value={total > 0 ? (unlocked / total) * 100 : 0} className="h-2 bg-stone-800" />
+        <Progress value={total > 0 ? ((status?.unlockedLocations ?? 0) / total) * 100 : 0} className="h-2 bg-stone-800" />
         <p className="text-stone-500 text-sm">
-          {FEATURE_CHAT_ENABLED
-            ? 'Loop door de binnenstad en scan op elke locatie de QR- of NFC-code om de verdachte daar te ondervragen.'
-            : 'Loop door de binnenstad en scan op elke locatie de QR- of NFC-code om het dossier van die locatie te openen.'}
+          Loop door de binnenstad en scan op elke locatie de NFC tag.
         </p>
       </div>
 
       {/* Map */}
       <LocationMap locations={locations} />
 
-      {/* Location list — tappable fallback under the map */}
+      {/* Location status list */}
       <Card className="bg-stone-900 border-stone-800">
         <CardHeader>
           <CardTitle className="font-serif text-xl text-stone-100">Locaties</CardTitle>
@@ -85,31 +81,10 @@ export function MapTab() {
             >
               <div className="min-w-0">
                 <p className="text-stone-100 font-serif truncate">{loc.name}</p>
-                <p className="text-stone-500 text-sm truncate">
-                  {loc.characterName
-                    ? `Verdachte: ${loc.characterName}`
-                    : 'Onbekende verdachte'}
-                </p>
               </div>
-              {loc.isUnlocked ? (
-                <Link
-                  href={
-                    FEATURE_CHAT_ENABLED
-                      ? `/chat?character=${loc.characterId}`
-                      : `/game?tab=onderzoek&location=${loc.id}`
-                  }
-                  className="flex-shrink-0 text-amber-500 hover:text-amber-400 font-serif text-sm transition-colors"
-                >
-                  {FEATURE_CHAT_ENABLED ? 'Gesprek →' : 'Dossier →'}
-                </Link>
-              ) : (
-                <Link
-                  href="/unlock"
-                  className="flex-shrink-0 text-stone-400 hover:text-stone-200 font-serif text-sm transition-colors"
-                >
-                  🔒 Ontgrendel
-                </Link>
-              )}
+              <span className="shrink-0" role="img" aria-label={loc.isUnlocked ? 'Ontgrendeld' : 'Vergrendeld'}>
+                {loc.isUnlocked ? '🔓' : '🔒'}
+              </span>
             </div>
           ))}
         </CardContent>
@@ -120,7 +95,7 @@ export function MapTab() {
         <Card className="bg-amber-950/40 border-amber-800/60">
           <CardContent className="pt-6 text-center space-y-3">
             <p className="text-amber-500 font-serif text-lg">
-              Alle locaties ontgrendeld — het moment van de waarheid is aangebroken.
+              Alle locaties bezocht — het moment van de waarheid is aangebroken.
             </p>
             <Link
               href="/tip"

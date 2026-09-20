@@ -74,11 +74,6 @@ export default function LocationMap({ locations }: LocationMapProps) {
           <Popup>
             <div className="map-popup">
               <h3 className="map-popup-title">{loc.name}</h3>
-              {loc.characterName && (
-                <p className="map-popup-character">
-                  Verdachte op deze plek: <strong>{loc.characterName}</strong>
-                </p>
-              )}
               {loc.description && <p className="map-popup-desc">{loc.description}</p>}
 
               {loc.isUnlocked ? (
@@ -98,9 +93,7 @@ export default function LocationMap({ locations }: LocationMapProps) {
                   </Link>
                 )
               ) : (
-                <Link href="/unlock" className="map-popup-cta map-popup-cta-locked">
-                  🔒 Scan hier de QR- of NFC-code
-                </Link>
+                <p className="text-stone-300">Scan hier de NFC tag</p>
               )}
             </div>
           </Popup>

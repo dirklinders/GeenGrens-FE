@@ -5,9 +5,9 @@ import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
 import { NewspaperHeadline } from '@/components/game/newspaper-headline';
+import { PaperSheet } from '@/components/game/paper-sheet';
 import { gameApi, SpeluitlegDTO } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 /** Split a multi-paragraph text into paragraphs (blank-line separated) */
 function paragraphs(text: string): string[] {
@@ -26,10 +26,7 @@ function ruleLines(text: string): string[] {
 }
 
 /**
- * Landing page: newspaper + achtergrond + speluitleg. Always viewable —
- * this page is NEVER redirected away from, regardless of flow progress.
- * Only the CTA adapts to progress: teams that finished onboarding get a
- * direct route into the game, new teams start the flow at /intro.
+ * Single game landing page: newspaper, case background and rules.
  */
 function SpeluitlegContent() {
   const { data: speluitleg, isLoading } = useSWR(
@@ -38,16 +35,13 @@ function SpeluitlegContent() {
     { revalidateOnFocus: false }
   );
 
-  const { data: status } = useSWR(
-    'game-status-home',
-    () => gameApi.getGameStatus(),
+  const { data: rules, isLoading: rulesLoading } = useSWR(
+    'game-rules',
+    () => gameApi.getRules(),
     { revalidateOnFocus: false }
   );
 
-  // Progress only changes the CTA below — it never redirects this page away.
-  const onboardingDone = Boolean(status?.introSeen && status?.rulesSeen);
-
-  if (isLoading || !speluitleg) {
+  if (isLoading || rulesLoading || !speluitleg || !rules) {
     return (
       <div className="min-h-screen bg-stone-950 flex items-center justify-center">
         <div className="animate-pulse text-stone-400 font-serif text-lg">
@@ -70,84 +64,77 @@ function SpeluitlegContent() {
 
         {/* Het verhaal / achtergrond */}
         <section className="max-w-2xl mx-auto">
-          <Card className="bg-stone-900 border-stone-800">
-            <CardHeader>
-              <CardTitle className="font-serif text-2xl text-stone-100">
-                {story.title || 'De Zaak-Muntonrecht'}
-              </CardTitle>
-              <p className="text-amber-600 font-serif text-sm uppercase tracking-widest">
-                Achtergrond
+          <PaperSheet>
+            <header className="border-b-4 border-double border-stone-800 pb-4 mb-6">
+              <p className="text-[10px] md:text-xs text-stone-600 uppercase tracking-[0.2em]">
+                Dossier Muntonrecht — Persbericht Z
               </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">
+                {story.title || 'De Zaak Thieme'}
+              </h1>
+              <p className="text-stone-700 font-serif text-sm italic mt-2">
+                Cold case · Oproep aan het publiek
+              </p>
+            </header>
+            <div className="space-y-4">
               {paragraphs(story.backstory).map((p, i) => (
-                <p key={i} className="text-stone-300 leading-relaxed font-serif">
+                <p key={i} className="text-stone-800 leading-relaxed font-serif">
                   {p}
                 </p>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </PaperSheet>
         </section>
 
-        {/* Speluitleg / regels */}
+        {/* Speluitleg / regels — same paper layout as the former rules page */}
         <section className="max-w-2xl mx-auto">
-          <Card className="bg-stone-900 border-stone-800">
-            <CardHeader>
-              <CardTitle className="font-serif text-2xl text-stone-100">
-                Zo speel je
-              </CardTitle>
-              <p className="text-amber-600 font-serif text-sm uppercase tracking-widest">
-                Speluitleg
+          <PaperSheet>
+            <header className="text-center border-b-4 border-double border-stone-800 pb-4 mb-8">
+              <p className="text-[10px] md:text-xs tracking-[0.3em] text-stone-600 uppercase">
+                Dossier Muntonrecht — Bijlage A
               </p>
-            </CardHeader>
-            <CardContent>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold mt-1">
+                {rules.title}
+              </h2>
+            </header>
+
+            {ruleLines(rules.body).filter(line => !/^\d+\./.test(line)).length > 0 && (
+              <p className="font-serif italic text-stone-700 mb-6">
+                {ruleLines(rules.body).filter(line => !/^\d+\./.test(line)).join(' ')}
+              </p>
+            )}
+
               <ol className="space-y-4">
-                {ruleLines(story.rules)
+                {ruleLines(rules.body)
                   .filter(l => /^\d+\./.test(l))
                   .map((line, i) => {
                     const dot = line.indexOf('.');
                     const body = line.slice(dot + 1).trim();
                     return (
                       <li key={i} className="flex gap-3">
-                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-600/20 border border-amber-700/50 text-amber-500 font-serif font-bold text-sm flex items-center justify-center">
+                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-900 text-amber-50 font-serif font-bold text-sm flex items-center justify-center">
                           {i + 1}
                         </span>
-                        <span className="text-stone-300 leading-relaxed">{body}</span>
+                        <span className="text-stone-800 leading-relaxed">{body}</span>
                       </li>
                     );
                   })}
               </ol>
-
-              {/* Persistent entry point to the full speluitleg (/rules) —
-                  reachable at any time, also after onboarding is complete */}
-              <div className="mt-6 text-center">
-                <Link
-                  href="/rules"
-                  className="text-amber-600 hover:text-amber-400 font-serif text-sm underline underline-offset-4 transition-colors"
-                >
-                  Volledige speluitleg bekijken →
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          </PaperSheet>
         </section>
 
-        {/* CTA — new teams start the flow at the detective's telegram;
-            returning teams jump straight back into the game. The homepage
-            itself never redirects. */}
+        {/* The game is directly accessible; there is no onboarding lock. */}
         <section className="max-w-2xl mx-auto text-center pb-8">
           <p className="text-stone-400 font-serif italic mb-5">
-            {onboardingDone
-              ? 'Het onderzoek wacht. Jullie sporen zijn bewaard.'
-              : 'Middernacht nadert. Het onderzoek begint nu.'}
+            Middernacht nadert. Het onderzoek begint nu.
           </p>
           <Button
             asChild
             size="lg"
             className="bg-amber-600 hover:bg-amber-500 text-stone-950 font-serif text-lg px-8"
           >
-            <Link href={onboardingDone ? '/game' : '/intro'}>
-              {onboardingDone ? 'Naar het spel →' : 'Start het onderzoek →'}
+            <Link href="/game">
+              Start het onderzoek →
             </Link>
           </Button>
         </section>

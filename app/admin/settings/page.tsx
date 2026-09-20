@@ -37,13 +37,13 @@ const DEFAULT_RULES_TITLE = 'Spelregels';
 
 const DEFAULT_RULES_BODY = `Eén team, één kans. Zo werken jullie onderzoek:
 
-1. Open de kaart. Elke locatie in de binnenstad huisvest één verdachte.
+1. Open de kaart. Elke locatie bevat informatie van de politie.
 
-2. Ga naar de locatie en scan daar de QR-code of NFC-tag. Daarmee ontgrendelen jullie het dossier van die locatie: een politieverklaring of een zoekfoto met vondsten.
+2. Ga naar de locatie en scan daar de NFC-tag. Daarmee ontgrendelen jullie het dossier van die locatie.
 
-3. Lees goed. In verklaringen zijn delen gezwart — wat eronder staat, blijft verborgen. Vergelijk de verhalen met elkaar: niet iedereen is eerlijk.
+3. Lees goed. In verklaringen zijn delen zwart gelakt — wat eronder staat, blijft verborgen.
 
-4. Houd het logigram bij. Zet een kruis bij wat uitgesloten is en een vinkje bij wat vaststaat. De aanwijzingen helpen jullie op weg.
+4. Houd het logigram bij. Zet een kruis bij wat uitgesloten is en een vinkje bij wat vaststaat. De dossiers helpen jullie op weg.
 
 5. Zodra jullie álle locaties hebben ontgrendeld, mogen jullie één definitieve aanklacht indienen: wie was de dader, welk wapen werd gebruikt, en op welke plek vond de moord plaats?
 
@@ -237,7 +237,7 @@ export default function GameSettingsPage() {
             <Input
               value={draft.speluitlegTitle}
               onChange={(e) => update({ speluitlegTitle: e.target.value })}
-              placeholder="De Zaak-Muntonrecht"
+              placeholder="De Zaak Thieme"
               className="bg-stone-800 border-stone-700 text-stone-100"
             />
           </div>

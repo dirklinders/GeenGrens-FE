@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import { gameApi, GameLocationDTO } from '@/lib/api';
@@ -324,7 +323,7 @@ export function InvestigationTab() {
   const { data: status } = useSWR(
     'game-status-onderzoek',
     () => gameApi.getGameStatus(),
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: true }
   );
 
   const unlocked = useMemo(() => (locations ?? []).filter(l => l.isUnlocked), [locations]);
@@ -369,7 +368,7 @@ export function InvestigationTab() {
   };
 
   const selected = unlocked.find(l => l.id === selectedId) ?? null;
-  const canSubmitTip = status?.canSubmitTip ?? false;
+  const canSubmitTip = !!status?.canSubmitTip && unlocked.length > 0 && locked.length === 0;
 
   if (isLoading || !locations) {
     return (
@@ -430,21 +429,13 @@ export function InvestigationTab() {
         <CardHeader>
           <CardTitle className="font-serif text-xl text-stone-100">Onderzoek</CardTitle>
           <CardDescription className="text-stone-400">
-            Verklaringen en zoekfoto's van ontgrendelde locaties.
+            Loop door de binnenstad en scan de NFC tag.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {unlocked.length === 0 ? (
             <p className="text-stone-500 font-serif italic">
-              Nog geen dossiers ontgrendeld. Loop door de binnenstad en scan op elke locatie
-              de QR- of NFC-code, of voer je locatiecode in via{' '}
-              <Link
-                href="/unlock"
-                className="text-amber-500 hover:text-amber-400 underline underline-offset-4"
-              >
-                ontgrendelen
-              </Link>
-              .
+              Nog geen dossiers beschikbaar. Bezoek een locatie om het onderzoek te beginnen.
             </p>
           ) : (
             unlocked.map(loc => (
@@ -457,13 +448,10 @@ export function InvestigationTab() {
                 <div className="min-w-0">
                   <p className="text-stone-100 font-serif truncate">{loc.name}</p>
                   <p className="text-stone-500 text-sm truncate">
-                    {loc.characterName ? `Verdachte: ${loc.characterName}` : 'Dossier'}
-                    {CONTENT_TYPE_LABEL[loc.contentType]
-                      ? ` · ${CONTENT_TYPE_LABEL[loc.contentType]}`
-                      : ''}
+                    {CONTENT_TYPE_LABEL[loc.contentType] || 'Dossier'}
                   </p>
                 </div>
-                <span className="flex-shrink-0 text-amber-500 font-serif text-sm">Open →</span>
+                <span className="shrink-0" role="img" aria-label="Ontgrendeld">🔓</span>
               </button>
             ))
           )}
@@ -471,20 +459,15 @@ export function InvestigationTab() {
           {locked.length > 0 && (
             <div className="pt-2 space-y-2">
               <p className="text-stone-600 text-xs font-serif uppercase tracking-wider">
-                {locked.length} locatie{locked.length === 1 ? '' : 's'} nog vergrendeld
+                {locked.length} locatie{locked.length === 1 ? '' : 's'} nog te bezoeken
               </p>
               {locked.map(loc => (
                 <div
                   key={loc.id}
                   className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-900 bg-stone-950/40 opacity-70"
                 >
-                  <p className="text-stone-500 font-serif truncate">🔒 {loc.name}</p>
-                  <Link
-                    href="/unlock"
-                    className="flex-shrink-0 text-stone-400 hover:text-stone-200 font-serif text-sm transition-colors"
-                  >
-                    Ontgrendel
-                  </Link>
+                  <p className="text-stone-500 font-serif truncate">{loc.name}</p>
+                  <span className="shrink-0" role="img" aria-label="Vergrendeld">🔒</span>
                 </div>
               ))}
             </div>
@@ -494,7 +477,7 @@ export function InvestigationTab() {
 
       {/* One-shot accusation once all location codes are found — same shared
           form as /tip, submission behavior unchanged (TipController). */}
-      {canSubmitTip && (
+      {canSubmitTip ? (
         <Card className={cn('bg-stone-900 border-amber-800/60')}>
           <CardHeader>
             <CardTitle className="font-serif text-xl text-amber-400">
@@ -508,6 +491,15 @@ export function InvestigationTab() {
           <CardContent>
             <AccusationForm variant="inline" />
           </CardContent>
+        </Card>
+      ) : (
+        <Card className="bg-stone-900 border-stone-800">
+          <CardHeader>
+            <CardTitle className="font-serif text-xl text-stone-400">🔒 Definitieve aanklacht</CardTitle>
+            <CardDescription className="text-stone-400">
+              Bezoek alle locaties en scan daar de NFC tag voordat jullie de definitieve aanklacht kunnen indienen.
+            </CardDescription>
+          </CardHeader>
         </Card>
       )}
     </div>

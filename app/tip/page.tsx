@@ -21,7 +21,7 @@ function TipContent() {
   const { data: gameStatus, isLoading: statusLoading } = useSWR(
     'game-status-tip',
     () => gameApi.getGameStatus(),
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: true }
   );
 
   // Redirect if not allowed to submit tips
@@ -44,7 +44,13 @@ function TipContent() {
           </p>
         </div>
 
-        <AccusationForm variant="page" />
+        {gameStatus?.canSubmitTip ? (
+          <AccusationForm variant="page" />
+        ) : (
+          <p className="text-center text-stone-400">
+            {statusLoading ? 'Voortgang controleren...' : 'Bezoek alle locaties en scan daar de NFC tag voordat jullie de definitieve aanklacht kunnen indienen.'}
+          </p>
+        )}
       </main>
     </div>
   );

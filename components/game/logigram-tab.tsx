@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import useSWR from 'swr';
 import {
   gameApi,
@@ -49,22 +49,6 @@ const CELL_DISPLAY_STYLES: Record<CellDisplay, string> = {
   check: 'text-emerald-400',
   'auto-check': 'text-emerald-400/40',
 };
-
-/** Small ✓/✕ badge on row/column headers showing the per-entry conclusion. */
-function HeaderBadge({ mark }: { mark: LogigramMark }) {
-  if (mark === 'none') return null;
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'absolute top-0.5 right-0.5 text-[10px] leading-none',
-        mark === 'check' ? 'text-emerald-400' : 'text-red-400/80'
-      )}
-    >
-      {mark === 'check' ? '✓' : '✕'}
-    </span>
-  );
-}
 
 /** The three puzzle sections, ordered: cat1 rows, cat2 columns, cat3 right/bottom. */
 interface LogigramSections {
@@ -266,6 +250,24 @@ export function LogigramTab() {
   const [marks, setMarks] = useState<MarkMap | null>(null);
   const dirtyRef = useRef(false);
   const [saveFailed, setSaveFailed] = useState(false);
+  // Resize real grid tracks instead of transforming the board: borders stay
+  // one pixel wide and the scrollable area always matches the visible puzzle.
+  const [cellSize, setCellSize] = useState(44);
+  const zoom = cellSize / 44;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const cellSizeRef = useRef(cellSize);
+  const pendingScroll = useRef<{ left: number; top: number } | null>(null);
+  const suppressClickUntil = useRef(0);
+
+  useLayoutEffect(() => {
+    cellSizeRef.current = cellSize;
+    const viewport = viewportRef.current;
+    if (viewport && pendingScroll.current) {
+      viewport.scrollLeft = pendingScroll.current.left;
+      viewport.scrollTop = pendingScroll.current.top;
+      pendingScroll.current = null;
+    }
+  }, [cellSize]);
 
   // Hydration + legacy cleanup. Historical versions persisted the derived
   // ✕s ("ghost minusses"): stored crosses that re-derive from the stored ✓s
@@ -343,6 +345,78 @@ export function LogigramTab() {
   }, [marks, mutate]);
 
   const sections = useMemo(() => (data ? buildSections(data) : null), [data]);
+  const boardReady = !!sections && marks !== null && !isLoading;
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!boardReady || !viewport) return;
+    let pinch: { distance: number; size: number; x: number; y: number } | null = null;
+    let pinching = false;
+    const measure = (touches: TouchList) => {
+      const a = touches[0];
+      const b = touches[1];
+      const rect = viewport.getBoundingClientRect();
+      return {
+        distance: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+        x: (a.clientX + b.clientX) / 2 - rect.left - viewport.clientLeft,
+        y: (a.clientY + b.clientY) / 2 - rect.top - viewport.clientTop,
+      };
+    };
+    const start = (event: TouchEvent) => {
+      if (event.touches.length !== 2) return;
+      event.preventDefault();
+      const point = measure(event.touches);
+      pinch = {
+        distance: Math.max(1, point.distance),
+        size: cellSizeRef.current,
+        x: viewport.scrollLeft + point.x,
+        y: viewport.scrollTop + point.y,
+      };
+      pinching = true;
+      suppressClickUntil.current = Infinity;
+    };
+    const move = (event: TouchEvent) => {
+      if (!pinching) return; // Keep native one-finger scrolling.
+      event.preventDefault();
+      if (!pinch || event.touches.length !== 2) return;
+      const point = measure(event.touches);
+      const size = Math.max(24, Math.min(88, Math.round(pinch.size * point.distance / pinch.distance)));
+      const ratio = size / pinch.size;
+      const scroll = { left: pinch.x * ratio - point.x, top: pinch.y * ratio - point.y };
+      if (size === cellSizeRef.current) {
+        viewport.scrollLeft = scroll.left;
+        viewport.scrollTop = scroll.top;
+      } else {
+        pendingScroll.current = scroll;
+        setCellSize(size);
+      }
+    };
+    const end = (event: TouchEvent) => {
+      if (!pinching) return;
+      if (event.cancelable) event.preventDefault();
+      pinch = null;
+      if (event.touches.length === 0 || event.type === 'touchcancel') {
+        pinching = false;
+        // A pinch must never turn into an accidental mark on release.
+        suppressClickUntil.current = Date.now() + 500;
+      } else if (event.touches.length === 2) {
+        start(event);
+      }
+    };
+    // React delegates touch events passively; native non-passive listeners
+    // let this board handle pinch without zooming the entire page.
+    viewport.addEventListener('touchstart', start, { passive: false });
+    viewport.addEventListener('touchmove', move, { passive: false });
+    viewport.addEventListener('touchend', end, { passive: false });
+    viewport.addEventListener('touchcancel', end, { passive: false });
+    return () => {
+      viewport.removeEventListener('touchstart', start);
+      viewport.removeEventListener('touchmove', move);
+      viewport.removeEventListener('touchend', end);
+      viewport.removeEventListener('touchcancel', end);
+      suppressClickUntil.current = 0;
+    };
+  }, [boardReady]);
 
   // Auto ✕s and inferred ✓s, derived at render time from the manual ✓/✕ set.
   const derived = useMemo<DerivedMarks>(() => {
@@ -375,11 +449,6 @@ export function LogigramTab() {
       return;
     }
     applyMark(key, MARK_CYCLE[marks[key] ?? 'none']);
-  };
-
-  const handleHeaderTap = (entryId: number) => {
-    if (!marks) return;
-    applyMark(headerKey(entryId), MARK_CYCLE[marks[headerKey(entryId)] ?? 'none']);
   };
 
   const cellDisplay = (rowId: number, colId: number): CellDisplay => {
@@ -477,9 +546,9 @@ export function LogigramTab() {
                   ? 'automatisch aangevinkt — tik om te bevestigen'
                   : 'geen markering'
         }`}
-        style={style}
+        style={{ ...style, fontSize: Math.round(16 * zoom) }}
         className={cn(
-          'bg-stone-950/80 hover:bg-stone-900 transition-colors aspect-square min-h-9 min-w-9 flex items-center justify-center font-serif text-sm',
+          'bg-stone-950 hover:bg-stone-900 transition-colors min-h-0 min-w-0 overflow-hidden flex items-center justify-center font-serif focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-amber-400',
           CELL_DISPLAY_STYLES[display],
         )}
       >
@@ -493,44 +562,36 @@ export function LogigramTab() {
   };
 
   const renderRowHeader = (entry: LogigramEntryDTO, row: number) => (
-    <button
+    <div
       key={`rowh-${entry.id}`}
-      type="button"
-      onClick={() => handleHeaderTap(entry.id)}
-      title={`${entry.name} — tik voor je conclusie`}
-      aria-label={`${entry.name}: conclusie markeren`}
+      title={entry.name}
       style={at('1', String(row))}
-      className="relative bg-stone-900 hover:bg-stone-800 transition-colors px-2 py-1.5 flex items-center text-left"
+      className="relative min-w-0 min-h-0 overflow-hidden bg-stone-900 px-2 py-1 flex items-center text-left"
     >
-      <span className="font-serif text-xs text-stone-300 leading-tight line-clamp-2">
+      <span className="font-serif text-stone-300 leading-tight line-clamp-2 break-words" style={{ fontSize: Math.max(10, Math.round(12 * zoom)) }}>
         {entry.name}
       </span>
-      <HeaderBadge mark={marks?.[headerKey(entry.id)] ?? 'none'} />
-    </button>
+    </div>
   );
 
   const renderColHeader = (entry: LogigramEntryDTO, column: number) => (
-    <button
+    <div
       key={`colh-${entry.id}`}
-      type="button"
-      onClick={() => handleHeaderTap(entry.id)}
-      title={`${entry.name} — tik voor je conclusie`}
-      aria-label={`${entry.name}: conclusie markeren`}
+      title={entry.name}
       style={at(String(column), '2')}
-      className="relative bg-stone-900 hover:bg-stone-800 transition-colors min-h-28 px-1 py-1.5 flex items-end justify-center"
+      className="relative min-w-0 min-h-0 overflow-hidden bg-stone-900 px-1 py-1.5 flex items-end justify-center"
     >
       <span
-        className="font-serif text-[11px] text-stone-300 leading-tight max-w-9 line-clamp-3"
-        style={{ writingMode: 'vertical-rl' }}
+        className="font-serif text-stone-300 leading-tight max-h-full overflow-hidden"
+        style={{ writingMode: 'vertical-rl', fontSize: Math.max(10, Math.round(11 * zoom)) }}
       >
         {entry.name}
       </span>
-      <HeaderBadge mark={marks?.[headerKey(entry.id)] ?? 'none'} />
-    </button>
+    </div>
   );
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6">
       <Card className="bg-stone-900 border-stone-800">
         <CardHeader>
           <CardTitle className="font-serif text-xl text-stone-100">Logigram</CardTitle>
@@ -551,10 +612,6 @@ export function LogigramTab() {
             markeringen — weg ⇢ de ✓, en ze verdwijnen vanzelf. Tik op een lichte ✕ om er een
             echte <span className="text-red-400">✕</span> van te maken, of op een lichte ✓ om hem
             te bevestigen als echte <span className="text-emerald-400">✓</span>.
-          </p>
-          <p className="text-stone-500">
-            Tik op een naam (rij- of kolomkop) om die verdachte, wapen of plek af te vinken
-            of af te kruisen.
           </p>
           <p className={cn('text-xs', saveFailed ? 'text-red-500' : 'text-stone-600')}>
             {saveFailed
@@ -579,20 +636,41 @@ export function LogigramTab() {
       )}
 
       {/* The inverted-L board: one grid, one scroll unit */}
-      <Card className="bg-stone-900 border-stone-800">
-        <CardContent className="pt-6">
-          <div className="overflow-x-auto pb-2">
+      <Card className="min-w-0 overflow-hidden bg-stone-900 border-stone-800">
+        <CardContent className="min-w-0 px-3 pt-4 sm:px-6 sm:pt-6">
+          <p className="mb-3 text-xs text-stone-400">Knijp met twee vingers om te zoomen. Veeg met één vinger om het bord te verschuiven.</p>
+          <div
+            ref={viewportRef}
+            className="max-h-[70svh] w-full min-w-0 overflow-auto rounded-sm border border-stone-800"
+            style={{ touchAction: 'pan-x pan-y' }}
+            tabIndex={0}
+            role="region"
+            aria-label="Logigram puzzel, knijp om te zoomen en veeg om te verschuiven"
+            onClickCapture={event => {
+              if (Date.now() < suppressClickUntil.current) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+            }}
+            onKeyDown={event => {
+              if (event.key === '+' || event.key === '=' || event.key === '-') {
+                event.preventDefault();
+                setCellSize(size => Math.max(24, Math.min(88, size + (event.key === '-' ? -4 : 4))));
+              }
+            }}
+          >
             <div
-              className="inline-grid gap-px bg-stone-800 border border-stone-800 rounded-sm select-none"
+              className="grid w-max gap-px bg-stone-800 select-none"
               style={{
-                gridTemplateColumns: `minmax(6.5rem, max-content) repeat(${nB}, minmax(2.25rem, 1fr)) repeat(${nC}, minmax(2.25rem, 1fr))`,
+                gridTemplateColumns: `${Math.round(128 * zoom)}px repeat(${nB + nC}, ${cellSize}px)`,
+                gridTemplateRows: `${Math.max(24, Math.round(28 * zoom))}px ${Math.round(128 * zoom)}px repeat(${nA + nC}, ${cellSize}px)`,
               }}
             >
               {/* Bottom-right area: intentionally empty */}
               <div
                 aria-hidden="true"
                 className="bg-stone-900"
-                style={at(`${colB(0)} / span ${nC}`, `${rowC(0)} / span ${nC}`)}
+                style={at(`${colC(0)} / span ${nC}`, `${rowC(0)} / span ${nC}`)}
               />
 
               {/* Corner: cat1 is the row axis of both top grids */}
@@ -647,12 +725,24 @@ export function LogigramTab() {
               ])}
             </div>
           </div>
-          <p className="mt-3 text-xs text-stone-600 font-serif">
-            <span className="text-red-400/40">✕</span>/
-            <span className="text-emerald-400/40">✓</span> automatisch ·{' '}
-            <span className="text-red-400">✕</span>/<span className="text-emerald-400">✓</span>{' '}
-            eigen markering · tik op een naam voor je conclusie.
-          </p>
+          <div className="mt-3 font-serif text-xs text-stone-400" aria-label="Legenda">
+            <p className="mb-2 font-semibold text-stone-300">Legenda</p>
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {([
+                ['check', '✓', 'Vaststaat — eigen markering'],
+                ['cross', '✕', 'Uitgesloten — eigen markering'],
+                ['auto-check', '✓', 'Automatisch aangevinkt'],
+                ['auto-cross', '✕', 'Automatisch uitgesloten'],
+              ] as const).map(([display, symbol, label]) => (
+                <li key={display} className="flex items-center gap-2">
+                  <span aria-hidden="true" className={cn('flex size-8 shrink-0 items-center justify-center rounded-sm border border-stone-800 bg-stone-950 text-base', CELL_DISPLAY_STYLES[display])}>
+                    {symbol}
+                  </span>
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </div>
