@@ -110,8 +110,8 @@ export default function GameSettingsPage() {
         <div>
           <h1 className="font-serif text-2xl text-stone-100">Spelinstellingen</h1>
           <p className="text-stone-500 text-sm mt-1">
-            De oplossing van de zaak, het introductie-telegram, de spelregels en de
-            startpagina-teksten. De oplossing is nooit zichtbaar voor spelers.
+            De oplossing van de zaak, het introductie-telegram en de spelregels.
+            De oplossing is nooit zichtbaar voor spelers.
           </p>
         </div>
         <Button
@@ -218,53 +218,6 @@ export default function GameSettingsPage() {
               onChange={(e) => update({ introBody: e.target.value })}
               placeholder={DEFAULT_INTRO_BODY}
               className="bg-stone-800 border-stone-700 text-stone-100 min-h-[280px] font-mono text-sm"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ── Speluitleg ── */}
-      <Card className="bg-stone-900 border-stone-800">
-        <CardHeader>
-          <CardTitle className="text-stone-100 text-lg font-serif">Speluitleg (startpagina)</CardTitle>
-          <p className="text-stone-500 text-sm">
-            Leeg veld = de ingebouwde standaardtekst wordt getoond.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1">
-            <Label className="text-stone-300 text-sm">Titel</Label>
-            <Input
-              value={draft.speluitlegTitle}
-              onChange={(e) => update({ speluitlegTitle: e.target.value })}
-              placeholder="De Zaak Thieme"
-              className="bg-stone-800 border-stone-700 text-stone-100"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-stone-300 text-sm">
-              Achtergrondverhaal{' '}
-              <span className="text-stone-500 font-normal">(lege regel = nieuwe alinea)</span>
-            </Label>
-            <Textarea
-              value={draft.speluitlegBackstory}
-              onChange={(e) => update({ speluitlegBackstory: e.target.value })}
-              placeholder="Het verhaal van de moord..."
-              className="bg-stone-800 border-stone-700 text-stone-100 min-h-[160px]"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-stone-300 text-sm">
-              Speluitleg / regels{' '}
-              <span className="text-stone-500 font-normal">(één regel per regelnummer, begin met 1. 2. 3. ...)</span>
-            </Label>
-            <Textarea
-              value={draft.speluitlegRules}
-              onChange={(e) => update({ speluitlegRules: e.target.value })}
-              placeholder={'1. Open de kaart...\n2. Scan de QR-code...\n3. ...'}
-              className="bg-stone-800 border-stone-700 text-stone-100 min-h-[160px]"
             />
           </div>
         </CardContent>

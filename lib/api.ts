@@ -47,7 +47,9 @@ export interface UserInfo {
   id: string;
   email: string;
   name: string;
+  teamId?: number;
   teamName?: string;
+  teamLocked?: boolean;
   isAdmin?: boolean;
 }
 
@@ -82,6 +84,13 @@ export interface TeamDTO {
   name: string;
   isPlaytest?: boolean;
   barName?: string | null;
+}
+
+export interface LobbyTeamDTO {
+  id: number;
+  name: string;
+  isLocked: boolean;
+  memberCount: number;
 }
 
 export interface LocationCodeDTO {
@@ -198,13 +207,6 @@ export interface GameLocationDTO {
    * content is configured, so nothing leaks early.
    */
   content: Record<string, unknown> | null;
-}
-
-/** Speluitleg content (GET /api/game/Speluitleg) */
-export interface SpeluitlegDTO {
-  title: string;
-  backstory: string;
-  rules: string;
 }
 
 /** Intro (detective telegram) / rules content (GET /api/game/Intro | /api/game/Rules) */
@@ -350,10 +352,6 @@ export const authApi = {
 // ────────────────────────────────────────────────────────────
 
 export const gameApi = {
-  /** Speluitleg content for the home page (falls back to built-in defaults) */
-  getSpeluitleg: () =>
-    fetchApi<SpeluitlegDTO>('/api/game/Speluitleg'),
-
   /** All locations for the map page, with per-team unlock state */
   getLocations: () =>
     fetchApi<GameLocationDTO[]>('/api/game/Locations'),
@@ -395,6 +393,21 @@ export const gameApi = {
       method: 'PUT',
       body: JSON.stringify({ marks }),
     }),
+};
+
+// ────────────────────────────────────────────────────────────
+// Pre-game team lobby
+// ────────────────────────────────────────────────────────────
+
+export const lobbyApi = {
+  getTeams: () => fetchApi<LobbyTeamDTO[]>('/api/Lobby/Teams'),
+  create: (name: string) => fetchApi<LobbyTeamDTO>('/api/Lobby/Create', {
+    method: 'POST', body: JSON.stringify({ name }),
+  }),
+  join: (teamId: number) => fetchApi<{ teamId: number; teamName: string }>('/api/Lobby/Join', {
+    method: 'POST', body: JSON.stringify({ teamId }),
+  }),
+  start: () => fetchApi<{ started: boolean; teamName: string }>('/api/Lobby/Start', { method: 'POST' }),
 };
 
 // ────────────────────────────────────────────────────────────

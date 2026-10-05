@@ -14,15 +14,15 @@ export function NewspaperHeadline() {
       </header>
       <article className="font-serif">
         <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-2">
-          Willem Thieme dood aangetroffen
+          Foppe Lawerman dood aangetroffen
         </h2>
         <p className="text-lg italic text-stone-700 mb-4">
           Politie staat voor een raadsel
         </p>
         <p className="text-sm leading-relaxed text-stone-800">
           <span className="font-bold">ZUTPHEN — </span>
-          Op 15 oktober is het lichaam van Willem Thieme uit het water gehaald.
-          Thieme was een bekende verschijning in de stad en stond bekend om zijn
+          Op 15 oktober is het lichaam van Foppe Lawerman uit het water gehaald.
+          Lawerman was een bekende verschijning in de stad en stond bekend om zijn
           voorliefde voor een borrel. De politie vermoedt moord. Door de vergevorderde
           staat van ontbinding kan de doodsoorzaak niet worden vastgesteld.
         </p>

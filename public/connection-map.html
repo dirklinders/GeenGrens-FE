@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hint connection map</title>
+  <style>
+    :root { color-scheme: dark; --ink:#ede9df; --muted:#9f9a90; --panel:#1d211f; --line:#3a403b; --accent:#f2c15d; --paper:#141714; --danger:#e87865; }
+    * { box-sizing:border-box; } body { margin:0; min-height:100vh; background:var(--paper); color:var(--ink); font:14px/1.4 Inter, ui-sans-serif, system-ui, sans-serif; }
+    header { height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 22px; border-bottom:1px solid var(--line); background:#181b18; }
+    h1 { margin:0; font-size:17px; letter-spacing:.02em; } .status { color:var(--muted); font-size:12px; }
+    main { display:grid; grid-template-columns:310px minmax(0,1fr); height:calc(100vh - 64px); }
+    aside { padding:18px; overflow:auto; border-right:1px solid var(--line); background:#191c19; }
+    section, details { margin-bottom:25px; } h2, summary { margin:0 0 10px; text-transform:uppercase; font-size:11px; letter-spacing:.11em; color:var(--muted); } summary { cursor:pointer; list-style:none; } summary::-webkit-details-marker { display:none; } summary::before { content:'›'; display:inline-block; margin-right:7px; font-size:16px; transition:transform .15s; } details[open] summary::before { transform:rotate(90deg); }
+    label { display:block; margin:10px 0 5px; font-size:12px; color:#c7c1b6; } input, select, textarea, button { width:100%; border:1px solid #495049; border-radius:7px; background:#252a26; color:var(--ink); padding:9px; font:inherit; }
+    textarea { min-height:70px; resize:vertical; } button { cursor:pointer; font-weight:650; } button:hover { filter:brightness(1.15); } .primary { background:var(--accent); border-color:var(--accent); color:#211a0c; } .secondary { background:transparent; } .danger { color:#ffab9d; border-color:#7c443a; }
+    .helper { color:var(--muted); font-size:12px; margin:7px 0 0; } .selected { color:var(--accent); font-weight:700; }
+    #board-wrap { overflow:hidden; position:relative; background-image:radial-gradient(#3d443e 1px, transparent 1px); background-size:20px 20px; }
+    #board { width:100%; height:100%; display:block; touch-action:none; } .edge { stroke:#94a092; stroke-width:2; marker-end:url(#arrow); } .edge-label { fill:#1c201d; stroke:#697269; stroke-width:1; rx:5; } .edge-text { fill:#e8e4d8; font-size:12px; pointer-events:none; }
+    .node circle { fill:#2b322c; stroke:#c6cfc0; stroke-width:2; cursor:grab; } .node.active circle { stroke:var(--accent); stroke-width:4; } .node text { fill:#f4f0e5; font-size:13px; font-weight:650; text-anchor:middle; dominant-baseline:middle; pointer-events:none; } .node:hover circle { fill:#384139; }
+    .empty { position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:var(--muted); pointer-events:none; font-size:14px; }
+    @media (max-width:760px) { main { grid-template-columns:1fr; grid-template-rows:auto 58vh; height:auto; } aside { border-right:0; border-bottom:1px solid var(--line); } }
+  </style>
+</head>
+<body>
+  <header><h1>Hint connection map</h1><span id="status" class="status">Saved locally</span></header>
+  <main>
+    <aside>
+      <details open>
+        <summary>1. Add a dot</summary>
+        <label for="node-name">Name</label><input id="node-name" placeholder="e.g. Agnes von Arnstein" />
+        <label for="node-subheading">Subheading <span style="color:#9f9a90">(optional)</span></label><input id="node-subheading" placeholder="e.g. Witness, 1962, interview" />
+        <label for="node-type">Type</label><select id="node-type"><option>Person</option><option>Place</option><option>Object</option><option>Event</option><option>Idea</option></select>
+        <button id="add-node" class="primary" style="margin-top:12px">Add dot</button>
+      </details>
+      <details open>
+        <summary>Selected dot</summary>
+        <p id="selected-info" class="helper">Click a dot to inspect it. Ctrl-click another dot to connect them; drag dots to arrange your map.</p>
+        <label for="edit-node-name">Name</label><input id="edit-node-name" disabled />
+        <label for="edit-node-subheading">Subheading</label><input id="edit-node-subheading" disabled />
+        <label for="edit-node-type">Type</label><select id="edit-node-type" disabled><option>Person</option><option>Place</option><option>Object</option><option>Event</option><option>Idea</option></select>
+        <button id="save-dot" class="secondary" disabled style="margin-top:10px">Save dot text</button>
+        <button id="delete-selected" class="danger" disabled>Delete selected dot</button>
+      </details>
+      <details open>
+        <summary>Selected connection</summary>
+        <p id="connection-info" class="helper">Click a connection label or line to edit it.</p>
+        <label for="edit-connection-text">Hint / connection text</label><textarea id="edit-connection-text" disabled></textarea>
+        <button id="save-connection" class="secondary" disabled style="margin-top:10px">Save connection text</button>
+        <button id="delete-connection" class="danger" disabled style="margin-top:8px">Delete connection</button>
+      </details>
+      <details>
+        <summary>Data</summary>
+        <button id="example" class="secondary">Load example</button>
+        <button id="clear" class="danger" style="margin-top:8px">Clear map</button>
+        <p class="helper">Everything is stored only in this browser's local storage.</p>
+      </details>
+    </aside>
+    <div id="board-wrap"><svg id="board" aria-label="Connection map"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a092" /></marker></defs><g id="edges"></g><g id="nodes"></g></svg><div id="empty" class="empty">Add your first dot, then connect it to another dot.<br>Dots can be reused in as many routes as you need.</div></div>
+  </main>
+  <script>
+    (() => {
+      const KEY = 'private-hint-connection-map-v1';
+      const $ = id => document.getElementById(id);
+      const state = JSON.parse(localStorage.getItem(KEY) || '{"nodes":[],"edges":[]}');
+      let selected = null, selectedEdge = null, dragging = null, zoom = 1, view = { x: 0, y: 0 };
+      const uid = () => crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+      function save() { localStorage.setItem(KEY, JSON.stringify(state)); $('status').textContent = 'Saved locally'; setTimeout(() => $('status').textContent = 'Saved locally', 800); }
+      function esc(value) { const d=document.createElement('div'); d.textContent=value; return d.innerHTML; }
+      function nodeLabel(n) { return `${n.name} · ${n.type}`; }
+      function syncView() { const r=$('board').getBoundingClientRect(); $('board').setAttribute('viewBox', `${view.x} ${view.y} ${r.width/zoom} ${r.height/zoom}`); $('board-wrap').style.backgroundSize=`${20*zoom}px ${20*zoom}px`; $('board-wrap').style.backgroundPosition=`${-view.x*zoom}px ${-view.y*zoom}px`; }
+      function pointToWorld(e) { const r=$('board').getBoundingClientRect(); return { x:view.x+(e.clientX-r.left)/r.width*(r.width/zoom), y:view.y+(e.clientY-r.top)/r.height*(r.height/zoom) }; }
+      function render() {
+        const nodeById = Object.fromEntries(state.nodes.map(n => [n.id,n]));
+        $('edges').innerHTML = state.edges.map(e => { const a=nodeById[e.from], b=nodeById[e.to]; if (!a||!b) return ''; const mx=(a.x+b.x)/2, my=(a.y+b.y)/2, label=esc(e.hint||'Connection'); const w=Math.max(78, e.hint.length*6.4+20), active=e.id===selectedEdge ? ' stroke="#f2c15d" stroke-width="2"' : ''; return `<g data-edge="${e.id}" style="cursor:pointer"><line class="edge" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/><rect class="edge-label"${active} x="${mx-w/2}" y="${my-15}" width="${w}" height="25"/><text class="edge-text" x="${mx}" y="${my+2}" text-anchor="middle">${label}</text></g>`; }).join('');
+        $('nodes').innerHTML = state.nodes.map(n => `<g class="node ${n.id===selected?'active':''}" data-id="${n.id}" transform="translate(${n.x} ${n.y})"><circle r="31"/><text y="-3">${esc(n.name).slice(0,17)}</text><text y="13" style="fill:#b6bdb4;font-size:10px;font-weight:500">${esc(n.subheading || n.type).slice(0,20)}</text></g>`).join('');
+        $('empty').style.display = state.nodes.length ? 'none' : 'grid';
+        const n=nodeById[selected]; $('selected-info').innerHTML = n ? `<span class="selected">${esc(n.name)}</span><br>${esc(n.type)} · ${state.edges.filter(e=>e.from===n.id||e.to===n.id).length} connection(s)<br><span class="helper">Ctrl-click another dot to connect it.</span>` : 'Click a dot to inspect it. Ctrl-click another dot to connect them; drag dots to arrange your map.';
+        ['edit-node-name','edit-node-subheading','edit-node-type','save-dot','delete-selected'].forEach(id => $(id).disabled = !n);
+        if (n) { $('edit-node-name').value=n.name; $('edit-node-subheading').value=n.subheading||''; $('edit-node-type').value=n.type; }
+        else { $('edit-node-name').value=''; $('edit-node-subheading').value=''; }
+        const edge=state.edges.find(e=>e.id===selectedEdge), from=edge&&nodeById[edge.from], to=edge&&nodeById[edge.to];
+        $('connection-info').innerHTML = edge ? `<span class="selected">${esc(from.name)} → ${esc(to.name)}</span>` : 'Click a connection label or line to edit it.';
+        ['edit-connection-text','save-connection','delete-connection'].forEach(id => $(id).disabled = !edge);
+        $('edit-connection-text').value=edge ? edge.hint||'' : '';
+      }
+      function addNode(name, subheading, type) { if (!name.trim()) return; const r=$('board').getBoundingClientRect(), width=r.width/zoom, height=r.height/zoom; const n={id:uid(), name:name.trim(), subheading:subheading.trim(), type, x:Math.max(36,view.x+width/2+(Math.random()-.5)*160), y:Math.max(36,view.y+height/2+(Math.random()-.5)*160)}; state.nodes.push(n); selected=n.id; save(); render(); return n; }
+      $('add-node').onclick = () => { addNode($('node-name').value, $('node-subheading').value, $('node-type').value); $('node-name').value=''; $('node-subheading').value=''; $('node-name').focus(); };
+      $('node-name').addEventListener('keydown', e => { if(e.key==='Enter') $('add-node').click(); });
+      $('board').addEventListener('pointerdown', e => { const edge=e.target.closest('[data-edge]'); if (edge) { selectedEdge=edge.dataset.edge; render(); return; } const el=e.target.closest('.node'); if(!el) { selected=null; selectedEdge=null; render(); return; } if (e.ctrlKey && selected && selected!==el.dataset.id) { const connection={id:uid(),from:selected,to:el.dataset.id,hint:''}; state.edges.push(connection); selected=el.dataset.id; selectedEdge=connection.id; save(); render(); return; } selected=el.dataset.id; selectedEdge=null; dragging=selected; $('board').setPointerCapture(e.pointerId); render(); });
+      $('board').addEventListener('pointermove', e => { if(!dragging) return; const p=pointToWorld(e), n=state.nodes.find(x=>x.id===dragging); n.x=Math.max(36,p.x); n.y=Math.max(36,p.y); render(); });
+      $('board').addEventListener('pointerup', () => { if(dragging) save(); dragging=null; });
+      $('board').addEventListener('wheel', e => { e.preventDefault(); const r=$('board').getBoundingClientRect(), p=pointToWorld(e), next=Math.max(.45,Math.min(2.8,zoom*(e.deltaY<0?1.12:1/1.12))); view.x=p.x-(e.clientX-r.left)/r.width*(r.width/next); view.y=p.y-(e.clientY-r.top)/r.height*(r.height/next); zoom=next; syncView(); $('status').textContent=`Zoom ${Math.round(zoom*100)}%`; }, {passive:false});
+      $('delete-selected').onclick = () => { const n=state.nodes.find(x=>x.id===selected); if(!n || !confirm(`Delete “${n.name}” and its connections?`)) return; state.nodes=state.nodes.filter(x=>x.id!==selected); state.edges=state.edges.filter(e=>e.from!==selected&&e.to!==selected); selected=null; save(); render(); };
+      $('save-dot').onclick = () => { const n=state.nodes.find(x=>x.id===selected), name=$('edit-node-name').value.trim(); if(!n || !name) return alert('A dot needs a name.'); n.name=name; n.subheading=$('edit-node-subheading').value.trim(); n.type=$('edit-node-type').value; save(); render(); };
+      $('save-connection').onclick = () => { const edge=state.edges.find(x=>x.id===selectedEdge); if(!edge) return; edge.hint=$('edit-connection-text').value.trim(); save(); render(); };
+      $('delete-connection').onclick = () => { const edge=state.edges.find(x=>x.id===selectedEdge); if(!edge || !confirm('Delete this connection?')) return; state.edges=state.edges.filter(x=>x.id!==selectedEdge); selectedEdge=null; save(); render(); };
+      $('clear').onclick = () => { if(confirm('Clear this map? This cannot be undone.')) { state.nodes=[]; state.edges=[]; selected=null; save(); render(); } };
+      $('example').onclick = () => { if(state.nodes.length && !confirm('Replace your current map with the example?')) return; state.nodes=[{id:'agnes',name:'Agnes von Arnstein',type:'Person',x:210,y:260},{id:'foppe',name:'Foppe',type:'Person',x:460,y:130},{id:'tower',name:'Wijnhuistoren',type:'Place',x:710,y:260}]; state.edges=[{id:'a1',from:'agnes',to:'tower',hint:'Ik was hier die avond'},{id:'a2',from:'agnes',to:'foppe',hint:'Foppe was seen with Agnes'},{id:'a3',from:'foppe',to:'tower',hint:'Foppe was at Wijnhuistoren'}]; selected='agnes'; save(); render(); };
+      syncView(); window.addEventListener('resize', syncView); render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
@@ -22,11 +22,12 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') || '/';
 
-  // If already authenticated, redirect
-  if (!isLoading && isAuthenticated) {
-    router.push(returnUrl);
-    return null;
-  }
+  // Redirect after rendering; navigating during render causes a React warning.
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) router.replace(returnUrl);
+  }, [isLoading, isAuthenticated, returnUrl, router]);
+
+  if (!isLoading && isAuthenticated) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

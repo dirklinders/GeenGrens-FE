@@ -21,8 +21,8 @@ const LocationMap = dynamic(() => import('@/components/game/location-map'), {
  * "Kaart" tab of the game shell: the Leaflet map plus the location status
  * list. Shared by `/game` (tab) and `/map` (legacy page, chat-enabled mode).
  *
- * Location rows show only their name and lock state; dossiers open through
- * the map popup or the Onderzoek tab.
+ * Unlocked location rows link directly to their dossier; locked rows only
+ * show their name and lock state.
  */
 export function MapTab() {
   const { data: locations, isLoading } = useSWR(
@@ -74,19 +74,35 @@ export function MapTab() {
           <CardTitle className="font-serif text-xl text-stone-100">Locaties</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {locations.map(loc => (
-            <div
-              key={loc.id}
-              className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60"
-            >
-              <div className="min-w-0">
-                <p className="text-stone-100 font-serif truncate">{loc.name}</p>
+          {locations.map(loc => {
+            const contents = (
+              <>
+                <div className="min-w-0">
+                  <p className="text-stone-100 font-serif truncate">{loc.name}</p>
+                </div>
+                <span className="shrink-0" role="img" aria-label={loc.isUnlocked ? 'Ontgrendeld' : 'Vergrendeld'}>
+                  {loc.isUnlocked ? '🔓' : '🔒'}
+                </span>
+              </>
+            );
+
+            return loc.isUnlocked ? (
+              <Link
+                key={loc.id}
+                href={`/game?tab=onderzoek&location=${loc.id}`}
+                className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60 hover:border-amber-800/60 transition-colors"
+              >
+                {contents}
+              </Link>
+            ) : (
+              <div
+                key={loc.id}
+                className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60"
+              >
+                {contents}
               </div>
-              <span className="shrink-0" role="img" aria-label={loc.isUnlocked ? 'Ontgrendeld' : 'Vergrendeld'}>
-                {loc.isUnlocked ? '🔓' : '🔒'}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </CardContent>
       </Card>
 

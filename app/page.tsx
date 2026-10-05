@@ -1,13 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
 import { NewspaperHeadline } from '@/components/game/newspaper-headline';
 import { PaperSheet } from '@/components/game/paper-sheet';
-import { gameApi, SpeluitlegDTO } from '@/lib/api';
+import { gameApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
 
 /** Split a multi-paragraph text into paragraphs (blank-line separated) */
 function paragraphs(text: string): string[] {
@@ -25,23 +28,35 @@ function ruleLines(text: string): string[] {
     .filter(Boolean);
 }
 
+const STORY_TITLE = 'De Zaak Lawerman';
+
+const STORY_BACKSTORY = `In 2001 werd het lichaam van Foppe Lawerman in Zutphen uit het water gehaald. Er waren nauwelijks aanknopingspunten. Nu de onderzoekstermijn van 25 jaar voor deze cold case bijna verstreken is, doet de politie een laatste oproep aan het publiek: help de zaak op te lossen.
+
+De moord vond plaats om precies 00:00 uur in de nacht van 10 oktober 2001. Zeven mogelijke moordlocaties, zeven verdachten — van wie één nergens bij naam wordt genoemd — en zeven mogelijke moordwapens. Vul in het logigram in waar iedereen zich om 00:00 uur bevond en welk mogelijk wapen diegene bij zich droeg. Misschien komt de moordenaar zo vanzelf aan het licht.
+
+De politie heeft alle informatie vrijgegeven die zij wettelijk mag delen. De dossiers liggen klaar. Het onderzoek is aan jullie. Veel succes.`;
+
 /**
  * Single game landing page: newspaper, case background and rules.
  */
 function SpeluitlegContent() {
-  const { data: speluitleg, isLoading } = useSWR(
-    'speluitleg',
-    () => gameApi.getSpeluitleg(),
-    { revalidateOnFocus: false }
-  );
-
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const { data: rules, isLoading: rulesLoading } = useSWR(
     'game-rules',
     () => gameApi.getRules(),
     { revalidateOnFocus: false }
   );
 
-  if (isLoading || rulesLoading || !speluitleg || !rules) {
+  useEffect(() => {
+    if (!authLoading && !user?.teamId) router.replace('/lobby');
+  }, [authLoading, router, user?.teamId]);
+
+  if (authLoading || !user?.teamId) {
+    return <div className="min-h-screen bg-stone-950" />;
+  }
+
+  if (rulesLoading || !rules) {
     return (
       <div className="min-h-screen bg-stone-950 flex items-center justify-center">
         <div className="animate-pulse text-stone-400 font-serif text-lg">
@@ -50,8 +65,6 @@ function SpeluitlegContent() {
       </div>
     );
   }
-
-  const story: SpeluitlegDTO = speluitleg;
 
   return (
     <div className="min-h-screen bg-stone-950">
@@ -70,14 +83,14 @@ function SpeluitlegContent() {
                 Dossier Muntonrecht — Persbericht Z
               </p>
               <h1 className="font-serif text-3xl md:text-4xl font-bold mt-2">
-                {story.title || 'De Zaak Thieme'}
+                {STORY_TITLE}
               </h1>
               <p className="text-stone-700 font-serif text-sm italic mt-2">
                 Cold case · Oproep aan het publiek
               </p>
             </header>
             <div className="space-y-4">
-              {paragraphs(story.backstory).map((p, i) => (
+              {paragraphs(STORY_BACKSTORY).map((p, i) => (
                 <p key={i} className="text-stone-800 leading-relaxed font-serif">
                   {p}
                 </p>
@@ -123,7 +136,7 @@ function SpeluitlegContent() {
           </PaperSheet>
         </section>
 
-        {/* The game is directly accessible; there is no onboarding lock. */}
+        {/* The team is already set up before this explanation page. */}
         <section className="max-w-2xl mx-auto text-center pb-8">
           <p className="text-stone-400 font-serif italic mb-5">
             Middernacht nadert. Het onderzoek begint nu.
