@@ -1,0 +1,4 @@
+cd /var/www/frontend
+git pull
+NEXT_PUBLIC_API_URL=https://muntonrecht.nl npm run build
+pm2 restart frontend
