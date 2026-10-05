@@ -729,7 +729,7 @@ export function LogigramTab() {
             <p className="mb-2 font-semibold text-stone-300">Legenda</p>
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {([
-                ['check', '✓', 'Vaststaat — eigen markering'],
+                ['check', '✓', 'Staat vast — eigen markering'],
                 ['cross', '✕', 'Uitgesloten — eigen markering'],
                 ['auto-check', '✓', 'Automatisch aangevinkt'],
                 ['auto-cross', '✕', 'Automatisch uitgesloten'],

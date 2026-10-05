@@ -45,6 +45,7 @@ function LobbyContent() {
   });
 
   const currentTeam = teams?.find(team => team.id === user?.teamId);
+  const memberLabel = (count: number) => `${count} ${count === 1 ? 'lid' : 'leden'}`;
 
   return (
     <main className="min-h-screen bg-stone-950 px-4 py-10 text-stone-100">
@@ -61,7 +62,7 @@ function LobbyContent() {
         {error && <p className="mb-5 rounded border border-red-800 bg-red-950/50 p-3 text-sm text-red-200">{error}</p>}
 
         {user?.teamLocked ? (
-          <Card className="border-amber-700/70 bg-stone-900">
+          <Card className="border-amber-600 bg-stone-900 text-stone-100 shadow-lg shadow-black/30">
             <CardHeader><CardTitle>Jullie team is vergrendeld</CardTitle></CardHeader>
             <CardContent className="space-y-4 text-stone-300">
               <p><strong className="text-stone-100">{user.teamName}</strong> is al aan het onderzoek begonnen. Teamleden kunnen niet meer worden gewijzigd; neem contact op met een beheerder als dat nodig is.</p>
@@ -70,29 +71,29 @@ function LobbyContent() {
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="border-stone-700 bg-stone-900">
+            <Card className="border-stone-600 bg-stone-900 text-stone-100 shadow-lg shadow-black/30">
               <CardHeader>
                 <CardTitle>Maak een team</CardTitle>
-                <CardDescription>Je wordt meteen lid van het nieuwe team.</CardDescription>
+                <CardDescription className="text-stone-300">Je wordt meteen lid van het nieuwe team.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Input value={name} maxLength={60} onChange={event => setName(event.target.value)} placeholder="Bijv. De Nachtbrakers" className="border-stone-700 bg-stone-950" />
-                <Button className="w-full" disabled={busy || !name.trim() || (hasCreatedTeam && !user?.isAdmin)} onClick={createTeam}>Team maken</Button>
-                {hasCreatedTeam && !user?.isAdmin && <p className="text-xs text-stone-500">Je hebt je ene team al aangemaakt.</p>}
+                <Input value={name} maxLength={60} onChange={event => setName(event.target.value)} placeholder="Bijv. De Nachtbrakers" className="border-stone-500 bg-stone-950 text-stone-100 placeholder:text-stone-400" />
+                <Button className="w-full bg-amber-600 text-stone-950 hover:bg-amber-500" disabled={busy || !name.trim() || (hasCreatedTeam && !user?.isAdmin)} onClick={createTeam}>Team maken</Button>
+                {hasCreatedTeam && !user?.isAdmin && <p className="text-xs text-stone-300">Je hebt je ene team al aangemaakt.</p>}
               </CardContent>
             </Card>
 
-            <Card className="border-stone-700 bg-stone-900">
+            <Card className="border-stone-600 bg-stone-900 text-stone-100 shadow-lg shadow-black/30">
               <CardHeader>
                 <CardTitle>Jouw team</CardTitle>
-                <CardDescription>{currentTeam ? `${currentTeam.memberCount} lid${currentTeam.memberCount === 1 ? '' : 'den'} · nog niet gestart` : 'Je hebt nog geen team gekozen.'}</CardDescription>
+                <CardDescription className="text-stone-300">{currentTeam ? `${memberLabel(currentTeam.memberCount)} · nog niet gestart` : 'Je hebt nog geen team gekozen.'}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {currentTeam && <p className="font-serif text-xl text-amber-400">{currentTeam.name}</p>}
                 <Button className="w-full bg-amber-600 text-stone-950 hover:bg-amber-500" disabled={busy || !currentTeam} onClick={startGame}>
                   Start het onderzoek en vergrendel team
                 </Button>
-                <p className="text-xs leading-relaxed text-stone-500">Na het starten zijn spelerswissels niet meer mogelijk. Beheerders kunnen teams altijd beheren.</p>
+                <p className="text-xs leading-relaxed text-stone-300">Na het starten zijn spelerswissels niet meer mogelijk. Beheerders kunnen teams altijd beheren.</p>
               </CardContent>
             </Card>
           </div>
@@ -104,9 +105,9 @@ function LobbyContent() {
             {isLoading ? <p className="text-stone-400">Teams laden…</p> : (
               <div className="space-y-3">
                 {(teams ?? []).map((team: LobbyTeamDTO) => (
-                  <div key={team.id} className="flex items-center justify-between gap-4 rounded border border-stone-800 bg-stone-900 p-4">
-                    <div><p className="font-medium">{team.name}</p><p className="text-sm text-stone-500">{team.memberCount} lid{team.memberCount === 1 ? '' : 'den'}</p></div>
-                    {team.isLocked ? <span className="text-sm text-stone-500">Vergrendeld</span> : team.id === user?.teamId ? <span className="text-sm text-amber-400">Jouw team</span> : <Button variant="outline" disabled={busy} onClick={() => run(() => lobbyApi.join(team.id))}>Deelnemen</Button>}
+                  <div key={team.id} className="flex items-center justify-between gap-4 rounded border border-stone-600 bg-stone-900 p-4 text-stone-100 shadow-md shadow-black/20">
+                    <div><p className="font-medium">{team.name}</p><p className="text-sm text-stone-300">{memberLabel(team.memberCount)}</p></div>
+                    {team.isLocked ? <span className="text-sm text-stone-300">Vergrendeld</span> : team.id === user?.teamId ? <span className="text-sm text-amber-300">Jouw team</span> : <Button variant="outline" className="border-stone-400 bg-stone-800 text-stone-100 hover:bg-stone-700 hover:text-white" disabled={busy} onClick={() => run(() => lobbyApi.join(team.id))}>Deelnemen</Button>}
                   </div>
                 ))}
                 {teams?.length === 0 && <p className="text-stone-500">Er zijn nog geen teams. Maak het eerste team aan.</p>}
