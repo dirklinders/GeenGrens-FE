@@ -131,9 +131,17 @@ function InterviewDossier({ content }: { content: InterviewContent }) {
 
 function SearchPictureDossier({ content }: { content: SearchPictureContent }) {
   const [active, setActive] = useState<SearchHotspot | null>(null);
+  const [foundIds, setFoundIds] = useState<string[]>([]);
   const hotspots = Array.isArray(content.hotspots)
     ? content.hotspots.filter(h => typeof h?.x === 'number' && typeof h?.y === 'number')
     : [];
+
+  const hotspotKey = (hotspot: SearchHotspot, index: number) => hotspot.id ?? String(index);
+  const inspect = (hotspot: SearchHotspot, index: number) => {
+    const key = hotspotKey(hotspot, index);
+    setFoundIds(found => (found.includes(key) ? found : [...found, key]));
+    setActive(hotspot);
+  };
 
   return (
     <div className="space-y-3">
@@ -159,17 +167,14 @@ function SearchPictureDossier({ content }: { content: SearchPictureContent }) {
               key={h.id ?? i}
               type="button"
               aria-label={h.label ?? `Markering ${i + 1}`}
-              onClick={() => setActive(h)}
-              className="absolute -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full border-2 border-amber-500 bg-amber-500/20 hover:bg-amber-500/40 focus-visible:ring-2 focus-visible:ring-amber-400 outline-none"
+              onClick={() => inspect(h, i)}
+              className="absolute -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full border border-transparent bg-transparent outline-none transition-all hover:border-amber-300/70 hover:bg-amber-300/10 focus-visible:ring-2 focus-visible:ring-amber-300"
               style={{ left: `${h.x}%`, top: `${h.y}%` }}
             >
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 rounded-full animate-ping bg-amber-500/30"
-              />
-              <span className="relative font-serif text-[11px] font-bold text-amber-300">
-                {i + 1}
-              </span>
+              <span className="sr-only">{h.label ?? `Vondst ${i + 1}`}</span>
+              {foundIds.includes(hotspotKey(h, i)) && (
+                <span aria-hidden="true" className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[11px] text-stone-950 shadow">✓</span>
+              )}
             </button>
           ))}
         </div>
@@ -179,22 +184,11 @@ function SearchPictureDossier({ content }: { content: SearchPictureContent }) {
 
       {/* Numbered legend — doubles as keyboard/click alternative for the pins */}
       {hotspots.length > 0 && (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {hotspots.map((h, i) => (
-            <li key={h.id ?? i}>
-              <button
-                type="button"
-                onClick={() => setActive(h)}
-                className="w-full text-left p-2 rounded-md border border-stone-800 bg-stone-950/60 hover:border-amber-700 transition-colors"
-              >
-                <span className="text-amber-500 font-serif text-xs mr-2">{i + 1}.</span>
-                <span className="text-stone-200 font-serif text-sm">
-                  {h.label ?? 'Markering'}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="rounded-md border border-stone-800 bg-stone-950/60 px-3 py-2">
+          <p className="font-serif text-sm text-stone-300">
+            Bewijs veiliggesteld: <span className="text-amber-400">{foundIds.length}/{hotspots.length}</span>
+          </p>
+        </div>
       )}
 
       <Dialog open={active !== null} onOpenChange={open => !open && setActive(null)}>
@@ -211,6 +205,7 @@ function SearchPictureDossier({ content }: { content: SearchPictureContent }) {
                 'Geen verdere details beschikbaar.'
               )}
             </DialogDescription>
+            <p className="pt-2 text-xs uppercase tracking-[0.18em] text-amber-400">Bewijs veiliggesteld</p>
           </DialogHeader>
         </DialogContent>
       </Dialog>
