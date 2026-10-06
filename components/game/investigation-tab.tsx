@@ -129,17 +129,36 @@ function InterviewDossier({ content }: { content: InterviewContent }) {
 // clickable hotspots (pulsing numbered pins, keyboard accessible).
 // ────────────────────────────────────────────────────────────
 
-function SearchPictureDossier({ content }: { content: SearchPictureContent }) {
+function SearchPictureDossier({
+  content,
+  locationId,
+  revealedHotspotIds,
+}: {
+  content: SearchPictureContent;
+  locationId: number;
+  revealedHotspotIds: string[];
+}) {
   const [active, setActive] = useState<SearchHotspot | null>(null);
-  const [foundIds, setFoundIds] = useState<string[]>([]);
+  const [foundIds, setFoundIds] = useState<string[]>(revealedHotspotIds);
   const hotspots = Array.isArray(content.hotspots)
     ? content.hotspots.filter(h => typeof h?.x === 'number' && typeof h?.y === 'number')
     : [];
 
+  // A team mate may reveal a hotspot while this dossier is open. Keep the UI
+  // aligned with the server payload whenever SWR refreshes it.
+  useEffect(() => {
+    setFoundIds(revealedHotspotIds);
+  }, [revealedHotspotIds]);
+
   const hotspotKey = (hotspot: SearchHotspot, index: number) => hotspot.id ?? String(index);
   const inspect = (hotspot: SearchHotspot, index: number) => {
     const key = hotspotKey(hotspot, index);
-    setFoundIds(found => (found.includes(key) ? found : [...found, key]));
+    if (!foundIds.includes(key)) {
+      // Optimistic update keeps the detail interaction instant. If the request
+      // fails, the next locations revalidation restores the server truth.
+      setFoundIds(found => (found.includes(key) ? found : [...found, key]));
+      void gameApi.revealSearchPictureHotspot(locationId, key).catch(() => undefined);
+    }
     setActive(hotspot);
   };
 
@@ -173,7 +192,12 @@ function SearchPictureDossier({ content }: { content: SearchPictureContent }) {
             >
               <span className="sr-only">{h.label ?? `Vondst ${i + 1}`}</span>
               {foundIds.includes(hotspotKey(h, i)) && (
-                <span aria-hidden="true" className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[11px] text-stone-950 shadow">✓</span>
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 flex items-center justify-center rounded-full bg-amber-500/85 text-xl font-bold text-stone-950 shadow"
+                >
+                  ✓
+                </span>
               )}
             </button>
           ))}
@@ -289,7 +313,13 @@ function DossierContent({ location }: { location: GameLocationDTO }) {
         />
       );
     }
-    return <SearchPictureDossier content={content} />;
+    return (
+      <SearchPictureDossier
+        content={content}
+        locationId={location.id}
+        revealedHotspotIds={location.revealedHotspotIds ?? []}
+      />
+    );
   }
 
   return <FallbackDossier location={location} />;

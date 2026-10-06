@@ -65,46 +65,52 @@ export function MapTab() {
         </p>
       </div>
 
-      {/* Map */}
-      <LocationMap locations={locations} />
+      {/* On phones the exact location list comes before the map. It provides a
+          reliable alternative when nearby Leaflet pins overlap; desktop keeps
+          the familiar map-first order. */}
+      <div className="flex flex-col gap-6">
+        <div className="order-2 md:order-1">
+          <LocationMap locations={locations} />
+        </div>
 
-      {/* Location status list */}
-      <Card className="bg-stone-900 border-stone-800">
-        <CardHeader>
-          <CardTitle className="font-serif text-xl text-stone-100">Locaties</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {locations.map(loc => {
-            const contents = (
-              <>
-                <div className="min-w-0">
-                  <p className="text-stone-100 font-serif truncate">{loc.name}</p>
+        {/* Location status list */}
+        <Card className="order-1 md:order-2 bg-stone-900 border-stone-800">
+          <CardHeader>
+            <CardTitle className="font-serif text-xl text-stone-100">Locaties</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {locations.map(loc => {
+              const contents = (
+                <>
+                  <div className="min-w-0">
+                    <p className="text-stone-100 font-serif truncate">{loc.name}</p>
+                  </div>
+                  <span className="shrink-0" role="img" aria-label={loc.isUnlocked ? 'Ontgrendeld' : 'Vergrendeld'}>
+                    {loc.isUnlocked ? '🔓' : '🔒'}
+                  </span>
+                </>
+              );
+
+              return loc.isUnlocked ? (
+                <Link
+                  key={loc.id}
+                  href={`/game?tab=onderzoek&location=${loc.id}`}
+                  className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60 hover:border-amber-800/60 transition-colors"
+                >
+                  {contents}
+                </Link>
+              ) : (
+                <div
+                  key={loc.id}
+                  className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60"
+                >
+                  {contents}
                 </div>
-                <span className="shrink-0" role="img" aria-label={loc.isUnlocked ? 'Ontgrendeld' : 'Vergrendeld'}>
-                  {loc.isUnlocked ? '🔓' : '🔒'}
-                </span>
-              </>
-            );
-
-            return loc.isUnlocked ? (
-              <Link
-                key={loc.id}
-                href={`/game?tab=onderzoek&location=${loc.id}`}
-                className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60 hover:border-amber-800/60 transition-colors"
-              >
-                {contents}
-              </Link>
-            ) : (
-              <div
-                key={loc.id}
-                className="flex items-center justify-between gap-3 p-3 rounded-md border border-stone-800 bg-stone-950/60"
-              >
-                {contents}
-              </div>
-            );
-          })}
-        </CardContent>
-      </Card>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Accusation CTA once all codes are found */}
       {canSubmitTip && (

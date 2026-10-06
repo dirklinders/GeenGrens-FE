@@ -207,6 +207,8 @@ export interface GameLocationDTO {
    * content is configured, so nothing leaks early.
    */
   content: Record<string, unknown> | null;
+  /** Search-picture hotspot ids discovered by the current team. */
+  revealedHotspotIds: string[];
 }
 
 /** Intro (detective telegram) / rules content (GET /api/game/Intro | /api/game/Rules) */
@@ -356,12 +358,23 @@ export const gameApi = {
   getLocations: () =>
     fetchApi<GameLocationDTO[]>('/api/game/Locations'),
 
+  /** Records a search-picture discovery for the whole current team. */
+  revealSearchPictureHotspot: (locationId: number, hotspotId: string) =>
+    fetchApi<{ revealed: boolean }>('/api/game/SearchPicture/Reveals', {
+      method: 'POST',
+      body: JSON.stringify({ locationId, hotspotId }),
+    }),
+
   getGameStatus: () =>
     fetchApi<GameStatusResponse>('/api/game/Status'),
 
   /** Returns only the characters unlocked by the current team via location codes */
   getUnlockedCharacters: () =>
     fetchApi<CharacterDTO[]>('/api/game/UnlockedCharacters'),
+
+  /** Every suspect selectable in the final accusation, including unassigned ones. */
+  getAccusationCharacters: () =>
+    fetchApi<CharacterDTO[]>('/api/game/AccusationCharacters'),
 
   /** Returns the pre-assigned location for the current team */
   getAssignedLocation: () =>

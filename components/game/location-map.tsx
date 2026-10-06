@@ -34,9 +34,11 @@ function makeIcon(unlocked: boolean): L.DivIcon {
   return L.divIcon({
     className: 'munton-map-pin-wrapper',
     html: inner,
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -34],
+    // A 48px hit area is much easier to tap accurately than the original
+    // 36px pin, especially on phones.
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [0, -46],
   });
 }
 

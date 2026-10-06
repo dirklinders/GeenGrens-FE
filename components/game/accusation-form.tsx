@@ -39,11 +39,11 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Unlocked characters — the selectable suspects. Same SWR keys as the
-  // original /tip implementation so the page and the tab share one cache.
+  // Every game character is a selectable suspect. This must not be limited to
+  // characters linked to an unlocked map location.
   const { data: characters, isLoading: charactersLoading } = useSWR(
-    'unlocked-characters-tip',
-    () => gameApi.getUnlockedCharacters(),
+    'accusation-characters',
+    () => gameApi.getAccusationCharacters(),
     { revalidateOnFocus: false }
   );
 
