@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { gameApi, GameLocationDTO } from '@/lib/api';
 import { useAbortableSWR } from '@/lib/use-abortable-swr';
-import { AccusationForm } from '@/components/game/accusation-form';
 import { PaperSheet } from '@/components/game/paper-sheet';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -393,7 +393,7 @@ export function InvestigationTab() {
   };
 
   const selected = unlocked.find(l => l.id === selectedId) ?? null;
-  const canSubmitTip = !!status?.canSubmitTip && unlocked.length > 0 && locked.length === 0;
+  const canSubmitTip = !!status?.canSubmitTip && !status?.tipSubmitted && unlocked.length > 0 && locked.length === 0;
 
   if (isLoading || !locations) {
     return (
@@ -500,8 +500,7 @@ export function InvestigationTab() {
         </CardContent>
       </Card>
 
-      {/* One-shot accusation once all location codes are found — same shared
-          form as /tip, submission behavior unchanged (TipController). */}
+      {/* The final accusation lives on its own guarded page. */}
       {canSubmitTip ? (
         <Card className={cn('bg-stone-900 border-amber-800/60')}>
           <CardHeader>
@@ -514,7 +513,12 @@ export function InvestigationTab() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <AccusationForm variant="inline" />
+            <Link
+              href="/tip"
+              className="flex min-h-12 w-full items-center justify-center rounded-md bg-amber-600 px-4 text-lg font-serif text-stone-950 transition-colors hover:bg-amber-500"
+            >
+              Naar Meld dader →
+            </Link>
           </CardContent>
         </Card>
       ) : (
@@ -522,7 +526,9 @@ export function InvestigationTab() {
           <CardHeader>
             <CardTitle className="font-serif text-xl text-stone-400">🔒 Definitieve aanklacht</CardTitle>
             <CardDescription className="text-stone-400">
-              Bezoek alle locaties en scan daar de NFC tag voordat jullie de definitieve aanklacht kunnen indienen.
+              {status?.tipSubmitted
+                ? 'Jullie definitieve aanklacht is al ontvangen. Een tweede inzending is niet mogelijk.'
+                : 'Bezoek alle locaties en scan daar de NFC tag voordat jullie de definitieve aanklacht kunnen indienen.'}
             </CardDescription>
           </CardHeader>
         </Card>

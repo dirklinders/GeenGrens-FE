@@ -35,7 +35,7 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
   const [selectedWeaponId, setSelectedWeaponId] = useState<number | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{ isCorrect: boolean; alreadySubmitted: boolean } | null>(null);
+  const [result, setResult] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -80,7 +80,7 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
         selectedWeaponId!,
         selectedLocationId!
       );
-      setResult(res);
+      setResult(res.submitted);
     } catch {
       setSubmitError('Er is een fout opgetreden bij het indienen van de aanklacht. Probeer het opnieuw.');
     } finally {
@@ -112,48 +112,15 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
 
   // ── Result screen ──
   if (result) {
-    const { isCorrect } = result;
-
     return wrap(
       <Card className="bg-stone-900 border-stone-800 max-w-xl w-full">
         <CardContent className="pt-8 pb-8 text-center space-y-6">
-          {isCorrect ? (
-            <>
-              <div className="text-emerald-500 text-6xl font-serif">Opgelost!</div>
-              <h2 className="text-stone-100 text-2xl font-serif">
-                De Zaak-Muntonrecht is gesloten
-              </h2>
-              <div className="text-stone-400 space-y-3">
-                <p>
-                  Jullie hadden bij elke vraag het juiste antwoord: de dader, het wapen en de
-                  plek waar het écht gebeurde. Het lichaam van Viktor Vermeer was verplaatst,
-                  maar jullie doorzagen het spel.
-                </p>
-                <p>
-                  Rechercheur De Groot sluit het dossier met jullie namen erin.
-                  Uitstekend werk, rechercheurs.
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-red-700 text-6xl font-serif">Ontsnapt</div>
-              <h2 className="text-stone-100 text-2xl font-serif">
-                De dader is vrijuit gegaan
-              </h2>
-              <div className="text-stone-400 space-y-3">
-                <p>
-                  Jullie aanklacht klopte niet helemaal — en met één kans per team is het
-                  dossier nu gesloten. Ergens in Muntonrecht loopt de moordenaar van Viktor
-                  Vermeer nog steeds vrij rond.
-                </p>
-                <p>
-                  Wie het was, met welk wapen en op welke plek? Dat blijft het geheim van
-                  de Zaak-Muntonrecht.
-                </p>
-              </div>
-            </>
-          )}
+          <div className="text-amber-500 text-6xl font-serif">Ontvangen</div>
+          <h2 className="text-stone-100 text-2xl font-serif">Bedankt voor jullie aanklacht</h2>
+          <div className="text-stone-400 space-y-3">
+            <p>De recherche heeft jullie inzending ontvangen en neemt deze mee in het onderzoek.</p>
+            <p>Er kan geen tweede aanklacht worden ingediend.</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -248,7 +215,7 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
           </CardHeader>
           <CardContent>
             <p className="text-stone-500 text-sm mb-3 font-serif italic">
-              Het lichaam is verplaatst — kies waar Viktor Vermeer écht werd vermoord.
+              Het lichaam is verplaatst — kies waar Foppe Lawerman écht werd vermoord.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {(locations ?? []).map(l => (

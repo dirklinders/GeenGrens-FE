@@ -9,9 +9,11 @@ import {
   LogigramMark,
 } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { PaperSheet } from '@/components/game/paper-sheet';
 import { cn } from '@/lib/utils';
 import { useAbortableSWR } from '@/lib/use-abortable-swr';
+import { useAuth } from '@/lib/auth-context';
 
 /** Map key for a per-entry (row/column conclusion) mark — sent with entryBId: null. */
 const headerKey = (entryId: number) => `h${entryId}`;
@@ -240,6 +242,7 @@ function deriveAutoMarks(
  * The solution is never rendered — the API doesn't send it.
  */
 export function LogigramTab() {
+  const { user } = useAuth();
   const { data, isLoading, mutate } = useAbortableSWR('logigram', signal => gameApi.getLogigram(signal), {
     revalidateOnFocus: false,
   });
@@ -248,6 +251,8 @@ export function LogigramTab() {
   // edits are never clobbered by re-renders or background revalidation.
   // Derived (auto ✕/✓) marks are never part of this state.
   const [marks, setMarks] = useState<MarkMap | null>(null);
+  const [unknownSuspectName, setUnknownSuspectName] = useState('');
+  const [suspectNameDraft, setSuspectNameDraft] = useState('');
   const dirtyRef = useRef(false);
   const [saveFailed, setSaveFailed] = useState(false);
   // Resize real grid tracks instead of transforming the board: borders stay
@@ -346,6 +351,38 @@ export function LogigramTab() {
 
   const sections = useMemo(() => (data ? buildSections(data) : null), [data]);
   const boardReady = !!sections && marks !== null && !isLoading;
+
+  const unknownSuspect = useMemo(() => {
+    if (!data) return null;
+    const suspectCategory = data.categories.find(category => category.key === 'suspect');
+    return data.entries.find(entry => entry.categoryId === suspectCategory?.id && entry.name.trim() === '?') ?? null;
+  }, [data]);
+
+  const unknownSuspectStorageKey = unknownSuspect
+    ? `muntonrecht.unknown-suspect.${user?.teamId ?? 'local'}.${unknownSuspect.id}`
+    : null;
+
+  useEffect(() => {
+    if (!unknownSuspectStorageKey) return;
+    const storedName = window.localStorage.getItem(unknownSuspectStorageKey) ?? '';
+    setUnknownSuspectName(storedName);
+    setSuspectNameDraft(storedName);
+  }, [unknownSuspectStorageKey]);
+
+  const displayEntryName = (entry: LogigramEntryDTO) =>
+    entry.id === unknownSuspect?.id && unknownSuspectName.trim()
+      ? unknownSuspectName.trim()
+      : entry.name;
+
+  const saveUnknownSuspectName = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = suspectNameDraft.trim();
+    setUnknownSuspectName(name);
+    if (unknownSuspectStorageKey) {
+      if (name) window.localStorage.setItem(unknownSuspectStorageKey, name);
+      else window.localStorage.removeItem(unknownSuspectStorageKey);
+    }
+  };
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -535,7 +572,7 @@ export function LogigramTab() {
         key={`cell-${rowEntry.id}-${colEntry.id}`}
         type="button"
         onClick={() => handleCellTap(rowEntry, colEntry)}
-        aria-label={`${rowEntry.name} en ${colEntry.name}: ${
+        aria-label={`${displayEntryName(rowEntry)} en ${displayEntryName(colEntry)}: ${
           display === 'check'
             ? 'vaststaat'
             : display === 'cross'
@@ -564,12 +601,12 @@ export function LogigramTab() {
   const renderRowHeader = (entry: LogigramEntryDTO, row: number) => (
     <div
       key={`rowh-${entry.id}`}
-      title={entry.name}
+      title={displayEntryName(entry)}
       style={at('1', String(row))}
       className="relative min-w-0 min-h-0 overflow-hidden bg-stone-900 px-2 py-1 flex items-center text-left"
     >
       <span className="font-serif text-stone-300 leading-tight line-clamp-2 break-words" style={{ fontSize: Math.max(10, Math.round(12 * zoom)) }}>
-        {entry.name}
+        {displayEntryName(entry)}
       </span>
     </div>
   );
@@ -577,7 +614,7 @@ export function LogigramTab() {
   const renderColHeader = (entry: LogigramEntryDTO, column: number) => (
     <div
       key={`colh-${entry.id}`}
-      title={entry.name}
+      title={displayEntryName(entry)}
       style={at(String(column), '2')}
       className="relative min-w-0 min-h-0 overflow-hidden bg-stone-900 px-1 py-1.5 flex items-end justify-center"
     >
@@ -585,7 +622,7 @@ export function LogigramTab() {
         className="font-serif text-stone-300 leading-tight max-h-full overflow-hidden"
         style={{ writingMode: 'vertical-rl', fontSize: Math.max(10, Math.round(11 * zoom)) }}
       >
-        {entry.name}
+        {displayEntryName(entry)}
       </span>
     </div>
   );
@@ -607,11 +644,7 @@ export function LogigramTab() {
           </p>
           <p className="text-stone-500">
             De <span className="text-red-400/40">lichte ✕</span> en{' '}
-            <span className="text-emerald-400/40">lichte ✓</span> zijn automatisch: ze volgen uit
-            je ✓ (persoon→wapen + persoon→plek impliceert wapen→plek) en zijn geen echte
-            markeringen — weg ⇢ de ✓, en ze verdwijnen vanzelf. Tik op een lichte ✕ om er een
-            echte <span className="text-red-400">✕</span> van te maken, of op een lichte ✓ om hem
-            te bevestigen als echte <span className="text-emerald-400">✓</span>.
+            <span className="text-emerald-400/40">lichte ✓</span> zijn automatisch.
           </p>
           <p className={cn('text-xs', saveFailed ? 'text-red-500' : 'text-stone-600')}>
             {saveFailed
@@ -632,6 +665,34 @@ export function LogigramTab() {
               <li key={clue.id}>{clue.text}</li>
             ))}
           </ol>
+        </PaperSheet>
+      )}
+
+      {unknownSuspect && (
+        <PaperSheet className="rounded-sm">
+          <form onSubmit={saveUnknownSuspectName} className="space-y-3">
+            <div>
+              <h2 className="font-serif text-lg font-bold text-stone-900">Onbekende verdachte</h2>
+              <p className="mt-1 font-serif text-sm leading-relaxed text-stone-700">
+                Wie is de verdachte met het vraagteken? Vul de naam in zodra jullie die hebben ontdekt.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                value={suspectNameDraft}
+                onChange={event => setSuspectNameDraft(event.target.value)}
+                placeholder="Theo Bouwmeester"
+                aria-label="Naam van de onbekende verdachte"
+                className="border-stone-400 bg-amber-50 text-stone-900 placeholder:text-stone-500"
+              />
+              <button
+                type="submit"
+                className="min-h-10 shrink-0 rounded-md bg-stone-900 px-4 font-serif text-sm font-semibold text-amber-50 transition-colors hover:bg-stone-700"
+              >
+                Naam invullen
+              </button>
+            </div>
+          </form>
         </PaperSheet>
       )}
 

@@ -113,6 +113,9 @@ export interface TeamProgressDTO {
     tipSuspectId?: string | null;
     tipWeaponId?: number | null;
     tipLocationId?: number | null;
+    tipSuspectName?: string | null;
+    tipWeaponName?: string | null;
+    tipLocationName?: string | null;
     tipIsCorrect?: boolean | null;
   } | null;
   unlockedCount: number;
@@ -134,6 +137,9 @@ export interface TeamDetailDTO {
     tipSuspectId?: string | null;
     tipWeaponId?: number | null;
     tipLocationId?: number | null;
+    tipSuspectName?: string | null;
+    tipWeaponName?: string | null;
+    tipLocationName?: string | null;
     tipIsCorrect?: boolean | null;
   } | null;
   unlockedCodes: Array<{
@@ -178,6 +184,8 @@ export interface UnlockedCode {
 export interface GameStatusResponse {
   canAccessChat?: boolean;
   canSubmitTip?: boolean;
+  /** The team has already sent its one final accusation. */
+  tipSubmitted?: boolean;
   unlockedLocations?: number;
   totalLocations?: number;
   isPlaytest?: boolean;
@@ -315,9 +323,7 @@ export interface LocationDTO {
 }
 
 export interface TipResult {
-  isCorrect: boolean;
-  alreadySubmitted: boolean;
-  suspectId?: string | null;
+  submitted: boolean;
 }
 
 export interface AssignedLocationDTO {

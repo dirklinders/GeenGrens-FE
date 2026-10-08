@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { AuthGuard } from '@/components/game/auth-guard';
 import { GameHeader } from '@/components/game/game-header';
@@ -15,21 +13,11 @@ import { gameApi } from '@/lib/api';
  * tipApi.submit → TipController (one-shot, server-validated).
  */
 function TipContent() {
-  const router = useRouter();
-
-  // Check access permission
   const { data: gameStatus, isLoading: statusLoading } = useSWR(
     'game-status-tip',
     () => gameApi.getGameStatus(),
     { revalidateOnFocus: true }
   );
-
-  // Redirect if not allowed to submit tips
-  useEffect(() => {
-    if (!statusLoading && gameStatus && !gameStatus.canSubmitTip) {
-      router.push('/');
-    }
-  }, [gameStatus, statusLoading, router]);
 
   return (
     <div className="min-h-screen bg-stone-950">
@@ -44,7 +32,11 @@ function TipContent() {
           </p>
         </div>
 
-        {gameStatus?.canSubmitTip ? (
+        {gameStatus?.tipSubmitted ? (
+          <div className="rounded-md border border-stone-800 bg-stone-900 p-6 text-center font-serif text-stone-400">
+            Jullie definitieve aanklacht is al ontvangen. Een tweede inzending is niet mogelijk.
+          </div>
+        ) : gameStatus?.canSubmitTip ? (
           <AccusationForm variant="page" />
         ) : (
           <p className="text-center text-stone-400">

@@ -265,11 +265,11 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
         <div className="bg-stone-900 border border-stone-800 rounded p-4 space-y-1">
           <p className="text-stone-400 text-xs font-medium uppercase tracking-wide">Ingediende aanklacht</p>
           <p className="text-stone-300 text-sm">
-            Verdachte: <span className="text-stone-100">{p.tipSuspectId ?? '—'}</span>
+            Verdachte: <span className="text-stone-100">{p.tipSuspectName ?? '—'}</span>
             {' · '}
-            Wapen: <span className="text-stone-100">{p.tipWeaponId ?? '—'}</span>
+            Wapen: <span className="text-stone-100">{p.tipWeaponName ?? '—'}</span>
             {' · '}
-            Locatie: <span className="text-stone-100">{p.tipLocationId ?? '—'}</span>
+            Locatie: <span className="text-stone-100">{p.tipLocationName ?? '—'}</span>
           </p>
         </div>
       )}
