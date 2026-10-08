@@ -220,6 +220,10 @@ html, body {
   margin-bottom: 4px;
 }
 
+.map-popup-title-no-description {
+  margin-bottom: 14px;
+}
+
 .map-popup-character {
   font-size: 0.85rem;
   color: #d6d3d1;
