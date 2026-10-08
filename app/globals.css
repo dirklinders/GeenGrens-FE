@@ -245,12 +245,13 @@ html, body {
   transition: background-color 0.15s ease;
 }
 
-.map-popup-cta-unlocked {
+.munton-map .map-popup-cta-unlocked {
   background: #b45309;
   color: #0c0a09;
 }
-.map-popup-cta-unlocked:hover {
+.munton-map .map-popup-cta-unlocked:hover {
   background: #d97706;
+  color: #0c0a09;
 }
 
 .map-popup-cta-locked {
