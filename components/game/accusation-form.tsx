@@ -60,6 +60,11 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
     () => gameApi.getLocations(),
     { revalidateOnFocus: false }
   );
+  const { data: gameStatus, mutate: mutateGameStatus } = useSWR(
+    'game-status',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false }
+  );
 
   const ready = Boolean(selectedCharacterId && selectedWeaponId && selectedLocationId);
 
@@ -81,6 +86,11 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
         selectedLocationId!
       );
       setResult(res.submitted);
+      await mutateGameStatus(current => current ? {
+        ...current,
+        canSubmitTip: false,
+        tipSubmitted: true,
+      } : current, { revalidate: false });
     } catch {
       setSubmitError('Er is een fout opgetreden bij het indienen van de aanklacht. Probeer het opnieuw.');
     } finally {
@@ -88,7 +98,12 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
     }
   };
 
-  const suspectName = characters?.find(c => c.id === selectedCharacterId)?.name ?? 'onbekend';
+  const suspectName = (() => {
+    const name = characters?.find(c => c.id === selectedCharacterId)?.name;
+    return name === '?' && gameStatus?.unknownSuspectName?.trim()
+      ? gameStatus.unknownSuspectName.trim()
+      : name ?? 'onbekend';
+  })();
   const weaponName = weapons?.find(w => w.id === selectedWeaponId)?.name ?? 'onbekend';
   const locationName = locations?.find(l => l.id === selectedLocationId)?.name ?? 'onbekend';
 
@@ -174,7 +189,9 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
                     </div>
                   )}
                   <span className="text-stone-200 font-serif text-sm leading-tight">
-                    {c.name ?? 'Onbekend'}
+                    {c.name === '?' && gameStatus?.unknownSuspectName?.trim()
+                      ? gameStatus.unknownSuspectName.trim()
+                      : c.name ?? 'Onbekend'}
                   </span>
                 </button>
               ))}

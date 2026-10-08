@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { PaperSheet } from '@/components/game/paper-sheet';
 import { cn } from '@/lib/utils';
 import { useAbortableSWR } from '@/lib/use-abortable-swr';
-import { useAuth } from '@/lib/auth-context';
+import useSWR from 'swr';
 
 /** Map key for a per-entry (row/column conclusion) mark — sent with entryBId: null. */
 const headerKey = (entryId: number) => `h${entryId}`;
@@ -242,10 +242,14 @@ function deriveAutoMarks(
  * The solution is never rendered — the API doesn't send it.
  */
 export function LogigramTab() {
-  const { user } = useAuth();
   const { data, isLoading, mutate } = useAbortableSWR('logigram', signal => gameApi.getLogigram(signal), {
     revalidateOnFocus: false,
   });
+  const { data: gameStatus, mutate: mutateGameStatus } = useSWR(
+    'game-status',
+    () => gameApi.getGameStatus(),
+    { revalidateOnFocus: false },
+  );
 
   // Optimistic local MANUAL mark state, hydrated once from the server. Local
   // edits are never clobbered by re-renders or background revalidation.
@@ -253,6 +257,7 @@ export function LogigramTab() {
   const [marks, setMarks] = useState<MarkMap | null>(null);
   const [unknownSuspectName, setUnknownSuspectName] = useState('');
   const [suspectNameDraft, setSuspectNameDraft] = useState('');
+  const [isSavingSuspectName, setIsSavingSuspectName] = useState(false);
   const dirtyRef = useRef(false);
   const [saveFailed, setSaveFailed] = useState(false);
   // Resize real grid tracks instead of transforming the board: borders stay
@@ -358,29 +363,31 @@ export function LogigramTab() {
     return data.entries.find(entry => entry.categoryId === suspectCategory?.id && entry.name.trim() === '?') ?? null;
   }, [data]);
 
-  const unknownSuspectStorageKey = unknownSuspect
-    ? `muntonrecht.unknown-suspect.${user?.teamId ?? 'local'}.${unknownSuspect.id}`
-    : null;
-
   useEffect(() => {
-    if (!unknownSuspectStorageKey) return;
-    const storedName = window.localStorage.getItem(unknownSuspectStorageKey) ?? '';
-    setUnknownSuspectName(storedName);
-    setSuspectNameDraft(storedName);
-  }, [unknownSuspectStorageKey]);
+    const savedName = gameStatus?.unknownSuspectName?.trim() ?? '';
+    setUnknownSuspectName(savedName);
+    setSuspectNameDraft(savedName);
+  }, [gameStatus?.unknownSuspectName]);
 
   const displayEntryName = (entry: LogigramEntryDTO) =>
     entry.id === unknownSuspect?.id && unknownSuspectName.trim()
       ? unknownSuspectName.trim()
       : entry.name;
 
-  const saveUnknownSuspectName = (event: React.FormEvent<HTMLFormElement>) => {
+  const saveUnknownSuspectName = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (gameStatus?.tipSubmitted) return;
     const name = suspectNameDraft.trim();
-    setUnknownSuspectName(name);
-    if (unknownSuspectStorageKey) {
-      if (name) window.localStorage.setItem(unknownSuspectStorageKey, name);
-      else window.localStorage.removeItem(unknownSuspectStorageKey);
+    setIsSavingSuspectName(true);
+    try {
+      const saved = await gameApi.saveUnknownSuspectName(name);
+      setUnknownSuspectName(saved.unknownSuspectName);
+      setSuspectNameDraft(saved.unknownSuspectName);
+      await mutateGameStatus(current => current ? { ...current, unknownSuspectName: saved.unknownSuspectName } : current, {
+        revalidate: false,
+      });
+    } finally {
+      setIsSavingSuspectName(false);
     }
   };
 
@@ -674,22 +681,26 @@ export function LogigramTab() {
             <div>
               <h2 className="font-serif text-lg font-bold text-stone-900">Onbekende verdachte</h2>
               <p className="mt-1 font-serif text-sm leading-relaxed text-stone-700">
-                Wie is de verdachte met het vraagteken? Vul de naam in zodra jullie die hebben ontdekt.
+                {gameStatus?.tipSubmitted
+                  ? 'Deze naam is vastgelegd bij jullie definitieve aanklacht.'
+                  : 'Wie is de verdachte met het vraagteken? Vul de naam in zodra jullie die hebben ontdekt.'}
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 value={suspectNameDraft}
                 onChange={event => setSuspectNameDraft(event.target.value)}
-                placeholder="Theo Bouwmeester"
+                placeholder="J. Doe"
                 aria-label="Naam van de onbekende verdachte"
+                disabled={gameStatus?.tipSubmitted || isSavingSuspectName}
                 className="border-stone-400 bg-amber-50 text-stone-900 placeholder:text-stone-500"
               />
               <button
                 type="submit"
-                className="min-h-10 shrink-0 rounded-md bg-stone-900 px-4 font-serif text-sm font-semibold text-amber-50 transition-colors hover:bg-stone-700"
+                disabled={gameStatus?.tipSubmitted || isSavingSuspectName}
+                className="min-h-10 shrink-0 rounded-md bg-stone-900 px-4 font-serif text-sm font-semibold text-amber-50 transition-colors hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Naam invullen
+                {isSavingSuspectName ? 'Opslaan...' : 'Naam invullen'}
               </button>
             </div>
           </form>

@@ -186,6 +186,8 @@ export interface GameStatusResponse {
   canSubmitTip?: boolean;
   /** The team has already sent its one final accusation. */
   tipSubmitted?: boolean;
+  /** Team-authored label for the anonymous suspect in the logigram. */
+  unknownSuspectName?: string | null;
   unlockedLocations?: number;
   totalLocations?: number;
   isPlaytest?: boolean;
@@ -401,6 +403,12 @@ export const gameApi = {
   /** Marks the rules as seen for the current team (idempotent) */
   markRulesSeen: () =>
     fetchApi<{ rulesSeen: boolean }>('/api/game/MarkRulesSeen', { method: 'POST' }),
+
+  saveUnknownSuspectName: (name: string) =>
+    fetchApi<{ unknownSuspectName: string }>('/api/game/UnknownSuspectName', {
+      method: 'PUT',
+      body: JSON.stringify({ name }),
+    }),
 
   /** Logigram data: categories, entries, clues and the current team's marks */
   getLogigram: (signal?: AbortSignal) =>
