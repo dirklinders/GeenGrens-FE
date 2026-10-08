@@ -75,7 +75,7 @@ export default function LocationMap({ locations }: LocationMapProps) {
         >
           <Popup>
             <div className="map-popup">
-              <h3 className="map-popup-title">{loc.name}</h3>
+              <h3 className={`map-popup-title${loc.description ? '' : ' mb-3'}`}>{loc.name}</h3>
               {loc.description && <p className="map-popup-desc">{loc.description}</p>}
 
               {loc.isUnlocked ? (
