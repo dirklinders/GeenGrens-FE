@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
@@ -128,7 +129,23 @@ function SpeluitlegContent() {
                         <span className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-900 text-amber-50 font-serif font-bold text-sm flex items-center justify-center">
                           {i + 1}
                         </span>
-                        <span className="text-stone-800 leading-relaxed">{body}</span>
+                        <div className="min-w-0 text-stone-800 leading-relaxed">
+                          <p>{body}</p>
+                          {i === 1 && (
+                            <div className="mt-3 inline-flex items-center gap-3 rounded-md border border-stone-400/70 bg-amber-50/50 px-3 py-2">
+                              <Image
+                                src="/icon.png"
+                                alt="Het groene MO-logo op de NFC-tag"
+                                width={56}
+                                height={56}
+                                className="h-14 w-14 shrink-0"
+                              />
+                              <span className="font-serif text-sm italic text-stone-700">
+                                Zoek naar dit groene MO-logo.
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </li>
                     );
                   })}

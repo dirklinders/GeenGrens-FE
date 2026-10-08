@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapTab } from '@/components/game/map-tab';
 import { LogigramTab } from '@/components/game/logigram-tab';
@@ -16,15 +16,33 @@ export type GameTab = (typeof TAB_VALUES)[number];
  * (header nav, map popups, unlock CTA) and survive reloads.
  */
 function GameTabsInner() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const raw = searchParams.get('tab');
-  const tab: GameTab = TAB_VALUES.includes(raw as GameTab) ? (raw as GameTab) : 'kaart';
+  const tabFromUrl: GameTab = TAB_VALUES.includes(raw as GameTab) ? (raw as GameTab) : 'kaart';
+  // Keep the tab responsive even when the route is busy. The URL is only a
+  // shareable/restorable representation of this local UI state, so it does
+  // not need a Next.js navigation for every tap.
+  const [tab, setTab] = useState<GameTab>(tabFromUrl);
+
+  // Pick up tab changes made by browser navigation or another in-app link.
+  useEffect(() => {
+    setTab(tabFromUrl);
+  }, [tabFromUrl]);
 
   const handleTabChange = (value: string) => {
-    router.replace(`${pathname}?tab=${value}`, { scroll: false });
+    if (!TAB_VALUES.includes(value as GameTab)) return;
+
+    const nextTab = value as GameTab;
+    setTab(nextTab);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', nextTab);
+    // Next.js observes native history changes, but this avoids queuing an RSC
+    // route transition for a tab change. `replaceState` also preserves the
+    // previous behaviour of not adding one browser-history entry per tap.
+    window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
   };
 
   const triggerClass =

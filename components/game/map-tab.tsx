@@ -2,8 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import useSWR from 'swr';
 import { gameApi } from '@/lib/api';
+import { useAbortableSWR } from '@/lib/use-abortable-swr';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
@@ -25,15 +25,15 @@ const LocationMap = dynamic(() => import('@/components/game/location-map'), {
  * show their name and lock state.
  */
 export function MapTab() {
-  const { data: locations, isLoading } = useSWR(
+  const { data: locations, isLoading } = useAbortableSWR(
     'game-locations',
-    () => gameApi.getLocations(),
+    signal => gameApi.getLocations(signal),
     { revalidateOnFocus: true }
   );
 
-  const { data: status } = useSWR(
+  const { data: status } = useAbortableSWR(
     'game-status-map',
-    () => gameApi.getGameStatus(),
+    signal => gameApi.getGameStatus(signal),
     { revalidateOnFocus: true }
   );
 

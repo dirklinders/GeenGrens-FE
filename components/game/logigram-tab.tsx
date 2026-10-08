@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import useSWR from 'swr';
 import {
   gameApi,
   LogigramCategoryDTO,
@@ -12,6 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PaperSheet } from '@/components/game/paper-sheet';
 import { cn } from '@/lib/utils';
+import { useAbortableSWR } from '@/lib/use-abortable-swr';
 
 /** Map key for a per-entry (row/column conclusion) mark — sent with entryBId: null. */
 const headerKey = (entryId: number) => `h${entryId}`;
@@ -240,7 +240,7 @@ function deriveAutoMarks(
  * The solution is never rendered — the API doesn't send it.
  */
 export function LogigramTab() {
-  const { data, isLoading, mutate } = useSWR('logigram', () => gameApi.getLogigram(), {
+  const { data, isLoading, mutate } = useAbortableSWR('logigram', signal => gameApi.getLogigram(signal), {
     revalidateOnFocus: false,
   });
 

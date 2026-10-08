@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import useSWR from 'swr';
 import { gameApi, GameLocationDTO } from '@/lib/api';
+import { useAbortableSWR } from '@/lib/use-abortable-swr';
 import { AccusationForm } from '@/components/game/accusation-form';
 import { PaperSheet } from '@/components/game/paper-sheet';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -339,15 +339,15 @@ function DossierContent({ location }: { location: GameLocationDTO }) {
 export function InvestigationTab() {
   const searchParams = useSearchParams();
 
-  const { data: locations, isLoading } = useSWR(
+  const { data: locations, isLoading } = useAbortableSWR(
     'game-locations',
-    () => gameApi.getLocations(),
+    signal => gameApi.getLocations(signal),
     { revalidateOnFocus: true }
   );
 
-  const { data: status } = useSWR(
+  const { data: status } = useAbortableSWR(
     'game-status-onderzoek',
-    () => gameApi.getGameStatus(),
+    signal => gameApi.getGameStatus(signal),
     { revalidateOnFocus: true }
   );
 

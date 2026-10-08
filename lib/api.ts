@@ -355,8 +355,8 @@ export const authApi = {
 
 export const gameApi = {
   /** All locations for the map page, with per-team unlock state */
-  getLocations: () =>
-    fetchApi<GameLocationDTO[]>('/api/game/Locations'),
+  getLocations: (signal?: AbortSignal) =>
+    fetchApi<GameLocationDTO[]>('/api/game/Locations', { signal }),
 
   /** Records a search-picture discovery for the whole current team. */
   revealSearchPictureHotspot: (locationId: number, hotspotId: string) =>
@@ -365,8 +365,8 @@ export const gameApi = {
       body: JSON.stringify({ locationId, hotspotId }),
     }),
 
-  getGameStatus: () =>
-    fetchApi<GameStatusResponse>('/api/game/Status'),
+  getGameStatus: (signal?: AbortSignal) =>
+    fetchApi<GameStatusResponse>('/api/game/Status', { signal }),
 
   /** Returns only the characters unlocked by the current team via location codes */
   getUnlockedCharacters: () =>
@@ -397,8 +397,8 @@ export const gameApi = {
     fetchApi<{ rulesSeen: boolean }>('/api/game/MarkRulesSeen', { method: 'POST' }),
 
   /** Logigram data: categories, entries, clues and the current team's marks */
-  getLogigram: () =>
-    fetchApi<LogigramDTO>('/api/game/Logigram'),
+  getLogigram: (signal?: AbortSignal) =>
+    fetchApi<LogigramDTO>('/api/game/Logigram', { signal }),
 
   /** Bulk-replaces the current team's logigram marks (PUT /api/game/Logigram/Marks) */
   saveLogigramMarks: (marks: LogigramMarkDTO[]) =>
