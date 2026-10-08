@@ -612,7 +612,7 @@ export default function LocationsPage() {
                           <p className="text-stone-500 text-sm mt-0.5">{loc.description}</p>
                         )}
                         <p className="text-stone-600 text-xs mt-1 font-mono">
-                          {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
+                          {loc.latitude.toFixed(8)}, {loc.longitude.toFixed(8)}
                           {' · '}
                           Verdachte: {loc.characterId ? characterName(loc.characterId) : '—'}
                         </p>

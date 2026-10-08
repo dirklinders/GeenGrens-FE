@@ -19,7 +19,7 @@ function FitBounds({ locations }: LocationMapProps) {
   useEffect(() => {
     if (locations.length === 0) return;
     const bounds = L.latLngBounds(locations.map(l => [l.latitude, l.longitude] as [number, number]));
-    map.fitBounds(bounds.pad(0.25), { maxZoom: 16 });
+    map.fitBounds(bounds.pad(0.25), { maxZoom: 18 });
   }, [locations, map]);
 
   return null;
