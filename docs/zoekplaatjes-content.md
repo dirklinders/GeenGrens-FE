@@ -66,7 +66,7 @@ De speler zoekt zelf in de afbeelding; de klikzones zijn niet zichtbaar.
 ```json
 {
   "note": "Notitie politie: toegangslog van T. Bouwmeester gevonden, gebruikt rond de tijd van de moord.",
-  "image": "/images/zoekplaatjes/de-munt.png",
+  "image": "/images/zoekplaatjes/de-munt-bloedspoor.png",
   "hotspots": [
     {
       "id": "crank",
@@ -88,6 +88,13 @@ De speler zoekt zelf in de afbeelding; de klikzones zijn niet zichtbaar.
       "y": 74,
       "label": "Toegangslog",
       "detail": "De log vermeldt toegang rond het vermoedelijke tijdstip van de moord. Naamplaatje in de buurt: T. Bouwmeester."
+    },
+    {
+      "id": "blood-trace",
+      "x": 61,
+      "y": 17,
+      "label": "Klein spoor op de nieuwe zwengel",
+      "detail": "Een klein, deels weggeveegd donkerrood spoor op de stalen zwengel van de pers. Mogelijk oud bloed."
     }
   ]
 }

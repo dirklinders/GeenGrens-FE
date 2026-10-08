@@ -31,7 +31,7 @@ function ruleLines(text: string): string[] {
 
 const STORY_TITLE = 'De Zaak Lawerman';
 
-const STORY_BACKSTORY = `In 2001 werd het lichaam van Foppe Lawerman in Zutphen uit het water gehaald. Er waren nauwelijks aanknopingspunten. Nu de onderzoekstermijn van 25 jaar voor deze cold case bijna verstreken is, doet de politie een laatste oproep aan het publiek: help de zaak op te lossen.
+const STORY_BACKSTORY = `In 2001 werd het lichaam van Foppe Lawerman in Zutphen uit het water gehaald. Er waren nauwelijks aanknopingspunten. Lawerman stond bekend als de dronkaard van de stad: bijna iedere avond was hij in de Wijnhuistoren te vinden. Nu de onderzoekstermijn van 25 jaar voor deze cold case bijna verstreken is, doet de politie een laatste oproep aan het publiek: help de zaak op te lossen.
 
 De moord vond plaats om precies 00:00 uur in de nacht van 10 oktober 2001. Zeven mogelijke moordlocaties, zeven verdachten — van wie één nergens bij naam wordt genoemd — en zeven mogelijke moordwapens. Vul in het logigram in waar iedereen zich om 00:00 uur bevond en welk mogelijk wapen diegene bij zich droeg. Misschien komt de moordenaar zo vanzelf aan het licht.
 
