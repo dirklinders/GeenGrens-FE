@@ -9,7 +9,7 @@ export function NewspaperHeadline() {
         </p>
         <div className="flex justify-between gap-3 text-xs text-stone-700 mt-3">
           <span>Stadsnieuws</span>
-          <time dateTime="2001-10-16">16 oktober 2001</time>
+          <time dateTime="2001-10-11">11 oktober 2001</time>
         </div>
       </header>
       <article className="font-serif">
@@ -21,7 +21,7 @@ export function NewspaperHeadline() {
         </p>
         <p className="text-sm leading-relaxed text-stone-800">
           <span className="font-bold">ZUTPHEN — </span>
-          Op 15 oktober is het lichaam van Foppe Lawerman uit het water gehaald.
+          In de vroege ochtend van 11 oktober is het lichaam van Foppe Lawerman uit het water gehaald.
           Lawerman was een bekende verschijning in de stad en stond bekend om zijn
           voorliefde voor een borrel. De politie vermoedt moord. Door de vergevorderde
           staat van ontbinding kan de doodsoorzaak niet worden vastgesteld.

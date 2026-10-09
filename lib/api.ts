@@ -729,6 +729,14 @@ export const locationCodeApi = {
     }),
   delete: (id: number) =>
     fetchApi<void>(`/api/LocationCode/${id}`, { method: 'DELETE' }),
+  uploadCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetchApi<{ count: number; message: string }>('/api/Tip/UploadLocations', {
+      method: 'POST',
+      body: formData,
+    });
+  },
 };
 
 // ────────────────────────────────────────────────────────────

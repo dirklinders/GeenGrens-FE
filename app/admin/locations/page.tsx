@@ -442,8 +442,8 @@ export default function LocationsPage() {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   try {
-                    const result = await locationApi.uploadCsv(file);
-                    alert(`${result.count} locaties geïmporteerd.`);
+                    const result = await locationCodeApi.uploadCsv(file);
+                    alert(`${result.count} locatiecodes geïmporteerd.`);
                     mutateCodes();
                   } catch {
                     alert('Fout bij het importeren van het CSV-bestand.');
