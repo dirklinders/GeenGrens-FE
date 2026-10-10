@@ -303,6 +303,16 @@ export interface WeaponDTO {
   stopKeywordWeapon: string | null;
 }
 
+/**
+ * Player-facing weapon (GET /api/game/Weapons). Deliberately excludes
+ * stopKeywordWeapon — that secret chat keyword never leaves the server.
+ */
+export interface GameWeaponDTO {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface TeamWeaponDTO {
   id: number;
   teamId: number;
@@ -383,6 +393,10 @@ export const gameApi = {
   /** Every suspect selectable in the final accusation, including unassigned ones. */
   getAccusationCharacters: () =>
     fetchApi<CharacterDTO[]>('/api/game/AccusationCharacters'),
+
+  /** Every weapon selectable in the final accusation (player-facing read). */
+  getWeapons: () =>
+    fetchApi<GameWeaponDTO[]>('/api/game/Weapons'),
 
   /** Returns the pre-assigned location for the current team */
   getAssignedLocation: () =>

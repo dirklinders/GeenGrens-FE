@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { gameApi, tipApi, weaponApi } from '@/lib/api';
+import { gameApi, tipApi } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -47,10 +47,11 @@ export function AccusationForm({ variant = 'page' }: AccusationFormProps) {
     { revalidateOnFocus: false }
   );
 
-  // All known weapons
+  // All known weapons. Uses the player-facing /api/game/Weapons — the admin
+  // CRUD /api/Weapon is admin-only and returns 403 for players.
   const { data: weapons, isLoading: weaponsLoading } = useSWR(
     'accusation-weapons',
-    () => weaponApi.getAll(),
+    () => gameApi.getWeapons(),
     { revalidateOnFocus: false }
   );
 
